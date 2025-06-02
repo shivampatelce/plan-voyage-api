@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: plan-voyage
+
+#    Database
   datasource:
     url: jdbc:mysql://localhost:3306/plan_voyage
     username: root
@@ -14,3 +16,18 @@ spring:
       ddl-auto: update
     show-sql: true
 
+#    Security
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/plan-voyage
+          jwt-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+
+# Keycloak configuration
+keycloak:
+  config:
+    resource-access: realm_access
+    client-key: plan-voyage-client
+    realm: plan-voyage
+    auth-server-url: http://localhost:8081
