@@ -3,7 +3,7 @@ package com.example.plan_voyage.dto;
 import java.util.Date;
 import java.util.UUID;
 
-public class TripListResDto {
+public class TripResDto {
     private UUID tripId;
 
     private String destination;
@@ -16,7 +16,7 @@ public class TripListResDto {
 
     private String destinationImageUrl;
 
-    public TripListResDto(UUID tripId, String destination, Date startDate, Date endDate, String userId, String destinationImageUrl) {
+    public TripResDto(UUID tripId, String destination, Date startDate, Date endDate, String userId, String destinationImageUrl) {
         this.tripId = tripId;
         this.destination = destination;
         this.startDate = startDate;

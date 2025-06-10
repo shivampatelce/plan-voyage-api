@@ -1,7 +1,7 @@
 package com.example.plan_voyage.services.impl;
 
 import com.example.plan_voyage.dto.CreateTripReqDto;
-import com.example.plan_voyage.dto.TripListResDto;
+import com.example.plan_voyage.dto.TripResDto;
 import com.example.plan_voyage.entity.Trip;
 import com.example.plan_voyage.repository.TripRepository;
 import com.example.plan_voyage.services.TripService;
@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -37,11 +38,11 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
-    public List<TripListResDto> getTripsByUserId(String userId) {
-        List<TripListResDto> trips = new LinkedList<>();
+    public List<TripResDto> getTripsByUserId(String userId) {
+        List<TripResDto> trips = new LinkedList<>();
         tripRepository.findByUserId(userId).stream().forEach((trip)->{
             try {
-                trips.add(new TripListResDto(trip.getTripId(),
+                trips.add(new TripResDto(trip.getTripId(),
                         trip.getDestination(),
                         trip.getStartDate(),
                         trip.getEndDate(),
@@ -57,6 +58,18 @@ public class TripServiceImpl implements TripService {
     @Override
     public void removeTripById(UUID tripId) {
         tripRepository.deleteById(tripId);
+    }
+
+    @Override
+    public TripResDto getTripByTripId(UUID tripId) throws JSONException {
+        Trip trip = tripRepository.findById(tripId).orElseThrow(()->new RuntimeException("Invalid trip id: " + tripId));
+        TripResDto tripResDto = new TripResDto(trip.getTripId(),
+                                    trip.getDestination(),
+                                    trip.getStartDate(),
+                                    trip.getEndDate(),
+                                    trip.getUserId(),
+                                    getDestinationImageLink(trip.getDestination()));
+        return tripResDto;
     }
 
     private String getDestinationImageLink(String destination) throws JSONException {
