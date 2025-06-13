@@ -164,4 +164,20 @@ public class TripServiceImpl implements TripService {
         return tripResDto;
     }
 
+    @Override
+    public void joinTrip(JoinTripReqDto joinTripReqDto) {
+        InviteUserRequests inviteRequest = inviteUserRepository.findById(joinTripReqDto.getInvitationId())
+                .orElseThrow(() -> new RuntimeException("Invalid invitation id"));
+
+        if(inviteRequest != null) {
+            Trip trip = tripRepository.findById(joinTripReqDto.getTripId())
+                    .orElseThrow(()-> new RuntimeException("Invalid trip id"));
+            TripUsers tripUsers = new TripUsers(joinTripReqDto.getUserId(), trip);
+
+            tripUsersRepository.save(tripUsers);
+
+            inviteUserRepository.delete(inviteRequest);
+        }
+    }
+
 }

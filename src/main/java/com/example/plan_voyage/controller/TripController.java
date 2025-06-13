@@ -97,4 +97,14 @@ public class TripController extends BaseController {
         }
         return success(tripDetails, "Trip details");
     }
+
+    @PostMapping("/join-trip")
+    public ResponseEntity<SuccessMessageResponse> joinTrip(@RequestBody JoinTripReqDto joinTripReqDto) {
+        try {
+            tripService.joinTrip(joinTripReqDto);
+        } catch (RuntimeException e) {
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/invitation");
+        }
+        return success("User has been added to trip planning");
+    }
 }
