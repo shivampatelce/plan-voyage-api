@@ -53,7 +53,11 @@ public class TripServiceImpl implements TripService {
     @Override
     public List<TripResDto> getTripsByUserId(String userId) {
         List<TripResDto> trips = new LinkedList<>();
-        tripRepository.findByUserId(userId).stream().forEach((trip) -> {
+
+        List<TripUsers> tripUsers = tripUsersRepository.findAllByUserId(userId);
+
+        tripUsers.stream().forEach((tripUser) -> {
+            Trip trip = tripUser.getTrip();
             try {
                 trips.add(new TripResDto(trip.getTripId(),
                         trip.getDestination(),

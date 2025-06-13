@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface TripUsersRepository extends JpaRepository<TripUsers, UUID> {
     @Query("SELECT i FROM TripUsers i WHERE i.trip.tripId = :tripId")
     List<TripUsers> findAllByTripId(@Param("tripId") UUID tripId);
+
+    List<TripUsers> findAllByUserId(String userId);
 }
