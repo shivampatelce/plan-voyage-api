@@ -24,4 +24,6 @@ public interface TripService {
     List<InviteUserRequests> getPendingInviteListByTripId(UUID tripId);
 
     void deleteInvitation(UUID invitationId);
+
+    List<TripResDto> getTripInvitationsListByEmailId(String email) throws JSONException;
 }

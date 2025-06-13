@@ -1,6 +1,7 @@
 package com.example.plan_voyage.services.impl;
 
 import com.example.plan_voyage.dto.CreateTripReqDto;
+import com.example.plan_voyage.dto.InvitationListReqDto;
 import com.example.plan_voyage.dto.InviteUserReqDto;
 import com.example.plan_voyage.dto.TripResDto;
 import com.example.plan_voyage.entity.InviteUserRequests;
@@ -33,9 +34,9 @@ public class TripServiceImpl implements TripService {
     @Override
     public Trip createTrip(CreateTripReqDto createTripReqDto) {
         Trip trip = new Trip(createTripReqDto.getDestination(),
-                            createTripReqDto.getStartDate(),
-                            createTripReqDto.getEndDate(),
-                            createTripReqDto.getUserId());
+                createTripReqDto.getStartDate(),
+                createTripReqDto.getEndDate(),
+                createTripReqDto.getUserId());
         trip = tripRepository.save(trip);
         return trip;
     }
@@ -43,7 +44,7 @@ public class TripServiceImpl implements TripService {
     @Override
     public List<TripResDto> getTripsByUserId(String userId) {
         List<TripResDto> trips = new LinkedList<>();
-        tripRepository.findByUserId(userId).stream().forEach((trip)->{
+        tripRepository.findByUserId(userId).stream().forEach((trip) -> {
             try {
                 trips.add(new TripResDto(trip.getTripId(),
                         trip.getDestination(),
@@ -65,21 +66,21 @@ public class TripServiceImpl implements TripService {
 
     @Override
     public TripResDto getTripByTripId(UUID tripId) throws JSONException {
-        Trip trip = tripRepository.findById(tripId).orElseThrow(()->new RuntimeException("Invalid trip id: " + tripId));
+        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new RuntimeException("Invalid trip id: " + tripId));
         TripResDto tripResDto = new TripResDto(trip.getTripId(),
-                                    trip.getDestination(),
-                                    trip.getStartDate(),
-                                    trip.getEndDate(),
-                                    trip.getUserId(),
-                                    getDestinationImageLink(trip.getDestination()));
+                trip.getDestination(),
+                trip.getStartDate(),
+                trip.getEndDate(),
+                trip.getUserId(),
+                getDestinationImageLink(trip.getDestination()));
         return tripResDto;
     }
 
     @Override
     public boolean inviteUser(InviteUserReqDto inviteUserReqDto) {
         Trip trip = tripRepository.findById(inviteUserReqDto.getTripId())
-                .orElseThrow(()->new RuntimeException("Invalid trip id: " + inviteUserReqDto.getTripId()));
-        inviteUserReqDto.getEmails().stream().forEach(email->{
+                .orElseThrow(() -> new RuntimeException("Invalid trip id: " + inviteUserReqDto.getTripId()));
+        inviteUserReqDto.getEmails().stream().forEach(email -> {
             InviteUserRequests inviteUserRequests = new InviteUserRequests(email, trip, inviteUserReqDto.getSentAt());
             inviteUserRepository.save(inviteUserRequests);
         });
@@ -112,6 +113,24 @@ public class TripServiceImpl implements TripService {
     @Override
     public void deleteInvitation(UUID invitationId) {
         inviteUserRepository.deleteById(invitationId);
+    }
+
+    @Override
+    public List<TripResDto> getTripInvitationsListByEmailId(String email) throws JSONException {
+        List<InviteUserRequests> invitations = inviteUserRepository.findAllByEmailId(email);
+        List<TripResDto> tripInvitations = new ArrayList<>();
+        for (InviteUserRequests invitation : invitations) {
+            try {
+                Trip trip = invitation.getTripId();
+                String imageLink = getDestinationImageLink(trip.getDestination());
+                tripInvitations.add(
+                        new TripResDto(trip.getTripId(), trip.getDestination(), trip.getStartDate(), trip.getEndDate(), trip.getUserId(), imageLink)
+                );
+            } catch (JSONException e) {
+                System.err.println("Failed to fetch image link for destination: " + invitation.getTripId().getDestination());
+            }
+        }
+        return tripInvitations;
     }
 
 }

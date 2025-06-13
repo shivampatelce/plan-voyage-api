@@ -1,9 +1,6 @@
 package com.example.plan_voyage.controller;
 
-import com.example.plan_voyage.dto.CreateTripReqDto;
-import com.example.plan_voyage.dto.InviteUserReqDto;
-import com.example.plan_voyage.dto.TripListDto;
-import com.example.plan_voyage.dto.TripResDto;
+import com.example.plan_voyage.dto.*;
 import com.example.plan_voyage.entity.InviteUserRequests;
 import com.example.plan_voyage.entity.Trip;
 import com.example.plan_voyage.services.TripService;
@@ -29,7 +26,7 @@ public class TripController extends BaseController {
     @PostMapping("/create-trip")
     public ResponseEntity<SuccessResponse<Trip>> createTrip(@RequestBody CreateTripReqDto createTripDto) {
         Trip trip = tripService.createTrip(createTripDto);
-        return success(trip,"New trip has been created.");
+        return success(trip, "New trip has been created.");
     }
 
     @PostMapping("/trip-list")
@@ -58,7 +55,7 @@ public class TripController extends BaseController {
     @PostMapping("/invite-user")
     public ResponseEntity<SuccessMessageResponse> inviteUser(@RequestBody InviteUserReqDto inviteUserReqDto) {
         boolean isInviteSent = tripService.inviteUser(inviteUserReqDto);
-        if(!isInviteSent) {
+        if (!isInviteSent) {
             return error("Something goes wrong while sending invitation", HttpStatus.BAD_REQUEST, "/invite-user");
         }
         return success("Invitation has been sent");
@@ -74,5 +71,16 @@ public class TripController extends BaseController {
     public ResponseEntity<SuccessMessageResponse> deleteInvite(@PathVariable UUID invitationId) {
         tripService.deleteInvitation(invitationId);
         return success("Invitation has been deleted with id: " + invitationId);
+    }
+
+    @PostMapping("/invitations")
+    public ResponseEntity<List<TripResDto>> getInvitationsByEmailId(@RequestBody InvitationListReqDto invitationListReqDto) {
+        List<TripResDto> invitations = null;
+        try {
+            invitations = tripService.getTripInvitationsListByEmailId(invitationListReqDto.getEmail());
+        } catch (JSONException e) {
+            return error("Something goes wrong while fetching destination image", HttpStatus.INTERNAL_SERVER_ERROR, "/invitations");
+        }
+        return success(invitations, "List of invitations");
     }
 }

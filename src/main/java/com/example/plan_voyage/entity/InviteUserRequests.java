@@ -1,5 +1,6 @@
 package com.example.plan_voyage.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -19,6 +20,7 @@ public class InviteUserRequests {
 
     @ManyToOne
     @JoinColumn(name = "trip_id")
+    @JsonProperty("trip")
     private Trip tripId;
 
     public InviteUserRequests() {}

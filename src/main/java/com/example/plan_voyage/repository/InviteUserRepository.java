@@ -12,4 +12,8 @@ import java.util.UUID;
 public interface InviteUserRepository extends JpaRepository<InviteUserRequests, UUID> {
     @Query("SELECT i FROM InviteUserRequests i WHERE i.tripId.tripId = :tripId")
     List<InviteUserRequests> findAllByTripId(@Param("tripId") UUID tripId);
+
+    @Query("SELECT i FROM InviteUserRequests i WHERE LOWER(i.email) = LOWER(:email)")
+    List<InviteUserRequests> findAllByEmailId(@Param("email") String email);
+
 }
