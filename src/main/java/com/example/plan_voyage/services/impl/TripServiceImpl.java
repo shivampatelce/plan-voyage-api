@@ -3,8 +3,10 @@ package com.example.plan_voyage.services.impl;
 import com.example.plan_voyage.dto.*;
 import com.example.plan_voyage.entity.InviteUserRequests;
 import com.example.plan_voyage.entity.Trip;
+import com.example.plan_voyage.entity.TripUsers;
 import com.example.plan_voyage.repository.InviteUserRepository;
 import com.example.plan_voyage.repository.TripRepository;
+import com.example.plan_voyage.repository.TripUsersRepository;
 import com.example.plan_voyage.services.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +33,9 @@ public class TripServiceImpl implements TripService {
     @Autowired
     private InviteUserRepository inviteUserRepository;
 
+    @Autowired
+    private TripUsersRepository tripUsersRepository;
+
     @Override
     public Trip createTrip(CreateTripReqDto createTripReqDto) {
         Trip trip = new Trip(createTripReqDto.getDestination(),
@@ -38,6 +43,10 @@ public class TripServiceImpl implements TripService {
                 createTripReqDto.getEndDate(),
                 createTripReqDto.getUserId());
         trip = tripRepository.save(trip);
+
+        TripUsers tripUsers = new TripUsers(trip.getUserId(), trip);
+        tripUsersRepository.save(tripUsers);
+
         return trip;
     }
 
@@ -67,12 +76,14 @@ public class TripServiceImpl implements TripService {
     @Override
     public TripResDto getTripByTripId(UUID tripId) throws JSONException {
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new RuntimeException("Invalid trip id: " + tripId));
+        List<TripUsers> tripUsers = tripUsersRepository.findAllByTripId(trip.getTripId());
         TripResDto tripResDto = new TripResDto(trip.getTripId(),
                 trip.getDestination(),
                 trip.getStartDate(),
                 trip.getEndDate(),
                 trip.getUserId(),
-                getDestinationImageLink(trip.getDestination()));
+                getDestinationImageLink(trip.getDestination()),
+                tripUsers);
         return tripResDto;
     }
 

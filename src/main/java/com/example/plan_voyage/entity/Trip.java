@@ -28,6 +28,9 @@ public class Trip {
     @JsonIgnore
     private List<InviteUserRequests> invitations = new ArrayList<>();
 
+    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TripUsers> tripUsers = new ArrayList<>();
+
     public Trip() {}
 
     public Trip(String destination, Date startDate, Date endDate, String userId) {
@@ -43,6 +46,25 @@ public class Trip {
         this.startDate = startDate;
         this.endDate = endDate;
         this.userId = userId;
+    }
+
+    public Trip(UUID tripId, String destination, Date startDate, Date endDate, String userId, List<TripUsers> tripUsers) {
+        this.tripId = tripId;
+        this.destination = destination;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.userId = userId;
+        this.tripUsers = tripUsers;
+    }
+
+    public Trip(UUID tripId, String destination, Date startDate, Date endDate, String userId, List<InviteUserRequests> invitations, List<TripUsers> tripUsers) {
+        this.tripId = tripId;
+        this.destination = destination;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.userId = userId;
+        this.invitations = invitations;
+        this.tripUsers = tripUsers;
     }
 
     public UUID getTripId() {
@@ -91,5 +113,13 @@ public class Trip {
 
     public void setInvitations(List<InviteUserRequests> invitations) {
         this.invitations = invitations;
+    }
+
+    public List<TripUsers> getTripUsers() {
+        return tripUsers;
+    }
+
+    public void setTripUsers(List<TripUsers> tripUsers) {
+        this.tripUsers = tripUsers;
     }
 }
