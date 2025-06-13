@@ -1,8 +1,11 @@
 package com.example.plan_voyage.services.impl;
 
 import com.example.plan_voyage.dto.CreateTripReqDto;
+import com.example.plan_voyage.dto.InviteUserReqDto;
 import com.example.plan_voyage.dto.TripResDto;
+import com.example.plan_voyage.entity.InviteUserRequests;
 import com.example.plan_voyage.entity.Trip;
+import com.example.plan_voyage.repository.InviteUserRepository;
 import com.example.plan_voyage.repository.TripRepository;
 import com.example.plan_voyage.services.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class TripServiceImpl implements TripService {
@@ -26,6 +26,9 @@ public class TripServiceImpl implements TripService {
 
     @Autowired
     private TripRepository tripRepository;
+
+    @Autowired
+    private InviteUserRepository inviteUserRepository;
 
     @Override
     public Trip createTrip(CreateTripReqDto createTripReqDto) {
@@ -72,6 +75,17 @@ public class TripServiceImpl implements TripService {
         return tripResDto;
     }
 
+    @Override
+    public boolean inviteUser(InviteUserReqDto inviteUserReqDto) {
+        Trip trip = tripRepository.findById(inviteUserReqDto.getTripId())
+                .orElseThrow(()->new RuntimeException("Invalid trip id: " + inviteUserReqDto.getTripId()));
+        inviteUserReqDto.getEmails().stream().forEach(email->{
+            InviteUserRequests inviteUserRequests = new InviteUserRequests(email, trip, inviteUserReqDto.getSentAt());
+            inviteUserRepository.save(inviteUserRequests);
+        });
+        return true;
+    }
+
     private String getDestinationImageLink(String destination) throws JSONException {
         RestTemplate restTemplate = new RestTemplate();
         String url = "https://pixabay.com/api/?key=" + pixabayApiKey + "&q=" + destination + "+place&image_type=photo";
@@ -87,6 +101,17 @@ public class TripServiceImpl implements TripService {
             return imageUrl;
         }
         return "https://images.unsplash.com/photo-1494806812796-244fe51b774d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW91bnRhaW5zfGVufDB8fDB8fHww";
+    }
+
+    @Override
+    public List<InviteUserRequests> getPendingInviteListByTripId(UUID tripId) {
+        List<InviteUserRequests> pendingInviteRequests = inviteUserRepository.findAllByTripId(tripId);
+        return pendingInviteRequests;
+    }
+
+    @Override
+    public void deleteInvitation(UUID invitationId) {
+        inviteUserRepository.deleteById(invitationId);
     }
 
 }

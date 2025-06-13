@@ -1,8 +1,10 @@
 package com.example.plan_voyage.controller;
 
 import com.example.plan_voyage.dto.CreateTripReqDto;
+import com.example.plan_voyage.dto.InviteUserReqDto;
 import com.example.plan_voyage.dto.TripListDto;
 import com.example.plan_voyage.dto.TripResDto;
+import com.example.plan_voyage.entity.InviteUserRequests;
 import com.example.plan_voyage.entity.Trip;
 import com.example.plan_voyage.services.TripService;
 import com.example.plan_voyage.util.BaseController;
@@ -53,4 +55,24 @@ public class TripController extends BaseController {
         return success("Trip removed with id: " + tripId);
     }
 
+    @PostMapping("/invite-user")
+    public ResponseEntity<SuccessMessageResponse> inviteUser(@RequestBody InviteUserReqDto inviteUserReqDto) {
+        boolean isInviteSent = tripService.inviteUser(inviteUserReqDto);
+        if(!isInviteSent) {
+            return error("Something goes wrong while sending invitation", HttpStatus.BAD_REQUEST, "/invite-user");
+        }
+        return success("Invitation has been sent");
+    }
+
+    @PostMapping("/pending-invite/{tripId}")
+    public ResponseEntity<List<InviteUserRequests>> inviteUsersList(@PathVariable UUID tripId) {
+        List<InviteUserRequests> pendingRequests = tripService.getPendingInviteListByTripId(tripId);
+        return success(pendingRequests, "List of pending invited users");
+    }
+
+    @DeleteMapping("/delete-invitation/{invitationId}")
+    public ResponseEntity<SuccessMessageResponse> deleteInvite(@PathVariable UUID invitationId) {
+        tripService.deleteInvitation(invitationId);
+        return success("Invitation has been deleted with id: " + invitationId);
+    }
 }
