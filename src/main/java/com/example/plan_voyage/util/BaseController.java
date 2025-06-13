@@ -27,4 +27,14 @@ public class BaseController<T> {
         errorResponse.setPath(path);
         return new ResponseEntity<>(errorResponse, httpStatus);
     }
+
+    protected ResponseEntity<ErrorResponse> error(String message, HttpStatus httpStatus, Long errorCode ,String path) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimeStamp(new Date());
+        errorResponse.setMessage(message);
+        errorResponse.setStatusCode(httpStatus.value());
+        errorResponse.setPath(path);
+        errorResponse.setErrorCode(errorCode);
+        return new ResponseEntity<>(errorResponse, httpStatus);
+    }
 }

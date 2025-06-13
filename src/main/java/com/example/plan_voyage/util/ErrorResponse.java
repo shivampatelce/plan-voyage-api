@@ -8,6 +8,8 @@ public class ErrorResponse {
     private int statusCode;
     private String path;
 
+    private Long errorCode;
+
     public Date getTimeStamp() {
         return timeStamp;
     }
@@ -38,5 +40,13 @@ public class ErrorResponse {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public Long getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(Long errorCode) {
+        this.errorCode = errorCode;
     }
 }

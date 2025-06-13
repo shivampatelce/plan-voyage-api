@@ -5,6 +5,7 @@ import com.example.plan_voyage.entity.InviteUserRequests;
 import com.example.plan_voyage.entity.Trip;
 import com.example.plan_voyage.services.TripService;
 import com.example.plan_voyage.util.BaseController;
+import com.example.plan_voyage.util.ErrorCode;
 import com.example.plan_voyage.util.SuccessMessageResponse;
 import com.example.plan_voyage.util.SuccessResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,13 +75,26 @@ public class TripController extends BaseController {
     }
 
     @PostMapping("/invitations")
-    public ResponseEntity<List<TripResDto>> getInvitationsByEmailId(@RequestBody InvitationListReqDto invitationListReqDto) {
-        List<TripResDto> invitations = null;
+    public ResponseEntity<List<InvitationListResDto>> getInvitationsByEmailId(@RequestBody InvitationListReqDto invitationListReqDto) {
+        List<InvitationListResDto> invitations = null;
         try {
             invitations = tripService.getTripInvitationsListByEmailId(invitationListReqDto.getEmail());
         } catch (JSONException e) {
             return error("Something goes wrong while fetching destination image", HttpStatus.INTERNAL_SERVER_ERROR, "/invitations");
         }
         return success(invitations, "List of invitations");
+    }
+
+    @PostMapping("/invitation")
+    public ResponseEntity<TripResDto> getInvitationDetailsByInvitationId(@RequestBody TripInvitationDetailReqDto tripInvitationDetailReqDto){
+        TripResDto tripDetails = null;
+        try {
+            tripDetails = tripService.getInvitationDetailByInvitation(tripInvitationDetailReqDto);
+        } catch (JSONException e) {
+            return error("Something goes wrong while fetching destination image", HttpStatus.INTERNAL_SERVER_ERROR, "/invitation");
+        } catch (RuntimeException e) {
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, ErrorCode.INVALID_TRIP_INVITATION, "/invitation");
+        }
+        return success(tripDetails, "Trip details");
     }
 }

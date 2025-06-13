@@ -16,4 +16,6 @@ public interface InviteUserRepository extends JpaRepository<InviteUserRequests, 
     @Query("SELECT i FROM InviteUserRequests i WHERE LOWER(i.email) = LOWER(:email)")
     List<InviteUserRequests> findAllByEmailId(@Param("email") String email);
 
+    InviteUserRequests findByInvitationIdAndEmail(UUID invitationId, String email);
+
 }

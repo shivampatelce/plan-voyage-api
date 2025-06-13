@@ -1,9 +1,6 @@
 package com.example.plan_voyage.services.impl;
 
-import com.example.plan_voyage.dto.CreateTripReqDto;
-import com.example.plan_voyage.dto.InvitationListReqDto;
-import com.example.plan_voyage.dto.InviteUserReqDto;
-import com.example.plan_voyage.dto.TripResDto;
+import com.example.plan_voyage.dto.*;
 import com.example.plan_voyage.entity.InviteUserRequests;
 import com.example.plan_voyage.entity.Trip;
 import com.example.plan_voyage.repository.InviteUserRepository;
@@ -17,7 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TripServiceImpl implements TripService {
@@ -116,21 +116,41 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
-    public List<TripResDto> getTripInvitationsListByEmailId(String email) throws JSONException {
+    public List<InvitationListResDto> getTripInvitationsListByEmailId(String email) throws JSONException {
         List<InviteUserRequests> invitations = inviteUserRepository.findAllByEmailId(email);
-        List<TripResDto> tripInvitations = new ArrayList<>();
+        List<InvitationListResDto> tripInvitations = new ArrayList<>();
         for (InviteUserRequests invitation : invitations) {
             try {
                 Trip trip = invitation.getTripId();
                 String imageLink = getDestinationImageLink(trip.getDestination());
                 tripInvitations.add(
-                        new TripResDto(trip.getTripId(), trip.getDestination(), trip.getStartDate(), trip.getEndDate(), trip.getUserId(), imageLink)
+                        new InvitationListResDto(invitation.getInvitationId(),
+                                new TripResDto(trip.getTripId(),
+                                                trip.getDestination(),
+                                                trip.getStartDate(),
+                                                trip.getEndDate(),
+                                                trip.getUserId(),
+                                                imageLink))
                 );
             } catch (JSONException e) {
                 System.err.println("Failed to fetch image link for destination: " + invitation.getTripId().getDestination());
             }
         }
         return tripInvitations;
+    }
+
+    @Override
+    public TripResDto getInvitationDetailByInvitation(TripInvitationDetailReqDto tripInvitationDetailReqDto) throws JSONException {
+        InviteUserRequests invitationRequest = inviteUserRepository.findByInvitationIdAndEmail(tripInvitationDetailReqDto.getInvitationId(), tripInvitationDetailReqDto.getEmail());
+        TripResDto tripResDto;
+        if (invitationRequest != null) {
+            Trip trip = invitationRequest.getTripId();
+            tripResDto = new TripResDto(trip.getTripId(), trip.getDestination(), trip.getStartDate(), trip.getEndDate(), trip.getUserId(), getDestinationImageLink(trip.getDestination()));
+        } else {
+            throw new RuntimeException("Invitation not found, may be your invitation has been deleted or created plan is deleted");
+        }
+
+        return tripResDto;
     }
 
 }

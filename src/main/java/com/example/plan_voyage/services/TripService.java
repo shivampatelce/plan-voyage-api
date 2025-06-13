@@ -1,8 +1,6 @@
 package com.example.plan_voyage.services;
 
-import com.example.plan_voyage.dto.CreateTripReqDto;
-import com.example.plan_voyage.dto.InviteUserReqDto;
-import com.example.plan_voyage.dto.TripResDto;
+import com.example.plan_voyage.dto.*;
 import com.example.plan_voyage.entity.InviteUserRequests;
 import com.example.plan_voyage.entity.Trip;
 import org.springframework.boot.configurationprocessor.json.JSONException;
@@ -25,5 +23,7 @@ public interface TripService {
 
     void deleteInvitation(UUID invitationId);
 
-    List<TripResDto> getTripInvitationsListByEmailId(String email) throws JSONException;
+    List<InvitationListResDto> getTripInvitationsListByEmailId(String email) throws JSONException;
+
+    TripResDto getInvitationDetailByInvitation(TripInvitationDetailReqDto tripInvitationDetailReqDto) throws JSONException;
 }
