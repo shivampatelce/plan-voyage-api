@@ -1,11 +1,12 @@
 package com.example.plan_voyage.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -22,6 +23,10 @@ public class Trip {
     private Date endDate;
 
     private String userId;
+
+    @OneToMany(mappedBy = "tripId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<InviteUserRequests> invitations = new ArrayList<>();
 
     public Trip() {}
 
@@ -78,5 +83,13 @@ public class Trip {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public List<InviteUserRequests> getInvitations() {
+        return invitations;
+    }
+
+    public void setInvitations(List<InviteUserRequests> invitations) {
+        this.invitations = invitations;
     }
 }

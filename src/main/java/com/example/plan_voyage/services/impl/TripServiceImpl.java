@@ -147,7 +147,7 @@ public class TripServiceImpl implements TripService {
             Trip trip = invitationRequest.getTripId();
             tripResDto = new TripResDto(trip.getTripId(), trip.getDestination(), trip.getStartDate(), trip.getEndDate(), trip.getUserId(), getDestinationImageLink(trip.getDestination()));
         } else {
-            throw new RuntimeException("Invitation not found, may be your invitation has been deleted or created plan is deleted");
+            throw new RuntimeException("Invitation not found. It may have been deleted, or the associated trip plan might no longer exist.");
         }
 
         return tripResDto;
