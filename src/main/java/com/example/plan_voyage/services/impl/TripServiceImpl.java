@@ -7,7 +7,10 @@ import com.example.plan_voyage.entity.TripUsers;
 import com.example.plan_voyage.repository.InviteUserRepository;
 import com.example.plan_voyage.repository.TripRepository;
 import com.example.plan_voyage.repository.TripUsersRepository;
+import com.example.plan_voyage.services.KeycloakService;
 import com.example.plan_voyage.services.TripService;
+import jakarta.transaction.Transactional;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.configurationprocessor.json.JSONException;
@@ -36,6 +39,9 @@ public class TripServiceImpl implements TripService {
     @Autowired
     private TripUsersRepository tripUsersRepository;
 
+    @Autowired
+    private KeycloakService keycloakService;
+
     @Override
     public Trip createTrip(CreateTripReqDto createTripReqDto) {
         Trip trip = new Trip(createTripReqDto.getDestination(),
@@ -58,6 +64,10 @@ public class TripServiceImpl implements TripService {
 
         tripUsers.stream().forEach((tripUser) -> {
             Trip trip = tripUser.getTrip();
+
+            List<UserDetailsDto> users = tripUsersRepository.findAllByTripId(trip.getTripId())
+                    .stream().map(user -> getUserDetailsByUserId(user.getUserId())).toList();
+
             try {
                 trips.add(new TripResDto(trip.getTripId(),
                         trip.getDestination(),
@@ -65,7 +75,7 @@ public class TripServiceImpl implements TripService {
                         trip.getEndDate(),
                         trip.getUserId(),
                         getDestinationImageLink(trip.getDestination()),
-                        tripUsersRepository.findAllByTripId(trip.getTripId())));
+                        users));
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
@@ -74,14 +84,19 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
+    @Transactional
     public void removeTripById(UUID tripId) {
+        tripUsersRepository.deleteAll(tripUsersRepository.findAllByTripId(tripId));
         tripRepository.deleteById(tripId);
     }
 
     @Override
     public TripResDto getTripByTripId(UUID tripId) throws JSONException {
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new RuntimeException("Invalid trip id: " + tripId));
-        List<TripUsers> tripUsers = tripUsersRepository.findAllByTripId(trip.getTripId());
+
+        List<UserDetailsDto> tripUsers = tripUsersRepository.findAllByTripId(trip.getTripId())
+                .stream().map(user -> getUserDetailsByUserId(user.getUserId())).toList();
+
         TripResDto tripResDto = new TripResDto(trip.getTripId(),
                 trip.getDestination(),
                 trip.getStartDate(),
@@ -90,6 +105,11 @@ public class TripServiceImpl implements TripService {
                 getDestinationImageLink(trip.getDestination()),
                 tripUsers);
         return tripResDto;
+    }
+
+    private UserDetailsDto getUserDetailsByUserId(String userId) {
+        UserRepresentation userDetails = keycloakService.getUserById(userId);
+        return new UserDetailsDto(userId, userDetails.getFirstName(), userDetails.getLastName(), userDetails.getEmail());
     }
 
     @Override
@@ -142,11 +162,11 @@ public class TripServiceImpl implements TripService {
                 tripInvitations.add(
                         new InvitationListResDto(invitation.getInvitationId(),
                                 new TripResDto(trip.getTripId(),
-                                                trip.getDestination(),
-                                                trip.getStartDate(),
-                                                trip.getEndDate(),
-                                                trip.getUserId(),
-                                                imageLink))
+                                        trip.getDestination(),
+                                        trip.getStartDate(),
+                                        trip.getEndDate(),
+                                        trip.getUserId(),
+                                        imageLink))
                 );
             } catch (JSONException e) {
                 System.err.println("Failed to fetch image link for destination: " + invitation.getTripId().getDestination());
@@ -174,9 +194,9 @@ public class TripServiceImpl implements TripService {
         InviteUserRequests inviteRequest = inviteUserRepository.findById(joinTripReqDto.getInvitationId())
                 .orElseThrow(() -> new RuntimeException("Invalid invitation id"));
 
-        if(inviteRequest != null) {
+        if (inviteRequest != null) {
             Trip trip = tripRepository.findById(joinTripReqDto.getTripId())
-                    .orElseThrow(()-> new RuntimeException("Invalid trip id"));
+                    .orElseThrow(() -> new RuntimeException("Invalid trip id"));
             TripUsers tripUsers = new TripUsers(joinTripReqDto.getUserId(), trip);
 
             tripUsersRepository.save(tripUsers);

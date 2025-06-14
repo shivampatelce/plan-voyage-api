@@ -19,7 +19,7 @@ public class TripResDto {
 
     private String destinationImageUrl;
 
-    private List<TripUsers> tripUsers;
+    private List<UserDetailsDto> tripUsers;
 
     public TripResDto(UUID tripId, String destination, Date startDate, Date endDate, String userId, String destinationImageUrl) {
         this.tripId = tripId;
@@ -30,7 +30,7 @@ public class TripResDto {
         this.destinationImageUrl = destinationImageUrl;
     }
 
-    public TripResDto(UUID tripId, String destination, Date startDate, Date endDate, String userId, String destinationImageUrl, List<TripUsers> tripUsers) {
+    public TripResDto(UUID tripId, String destination, Date startDate, Date endDate, String userId, String destinationImageUrl, List<UserDetailsDto> tripUsers) {
         this.tripId = tripId;
         this.destination = destination;
         this.startDate = startDate;
@@ -88,11 +88,11 @@ public class TripResDto {
         this.destinationImageUrl = destinationImageUrl;
     }
 
-    public List<TripUsers> getTripUsers() {
+    public List<UserDetailsDto> getTripUsers() {
         return tripUsers;
     }
 
-    public void setTripUsers(List<TripUsers> tripUsers) {
+    public void setTripUsers(List<UserDetailsDto> tripUsers) {
         this.tripUsers = tripUsers;
     }
 }

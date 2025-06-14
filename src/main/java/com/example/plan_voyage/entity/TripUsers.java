@@ -18,7 +18,7 @@ public class TripUsers {
     private String userId;
 
     @ManyToOne
-    @JoinColumn(name = "trip_id")
+    @JoinColumn(name = "trip_id", nullable = false)
     @JsonProperty("trip")
     @JsonIgnore
     private Trip trip;
