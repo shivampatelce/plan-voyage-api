@@ -185,4 +185,9 @@ public class TripServiceImpl implements TripService {
         }
     }
 
+    @Override
+    public void exitFromTrip(ExitTripReqDto exitTripReqDto) {
+        tripUsersRepository.deleteByTripIdAndUserId(exitTripReqDto.getTripId(), exitTripReqDto.getUserId());
+    }
+
 }

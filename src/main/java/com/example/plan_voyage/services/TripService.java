@@ -28,4 +28,6 @@ public interface TripService {
     TripResDto getInvitationDetailByInvitation(TripInvitationDetailReqDto tripInvitationDetailReqDto) throws JSONException;
 
     void joinTrip(JoinTripReqDto joinTripReqDto);
+
+    void exitFromTrip(ExitTripReqDto exitTripReqDto);
 }

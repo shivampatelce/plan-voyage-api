@@ -107,4 +107,10 @@ public class TripController extends BaseController {
         }
         return success("User has been added to trip planning");
     }
+
+    @DeleteMapping("/exit-trip")
+    public ResponseEntity<SuccessMessageResponse> exitTrip(@RequestBody ExitTripReqDto exitTripReqDto) {
+        tripService.exitFromTrip(exitTripReqDto);
+        return success("User has been exited from trip planning.");
+    }
 }
