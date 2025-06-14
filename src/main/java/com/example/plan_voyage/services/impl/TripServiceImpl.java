@@ -64,7 +64,8 @@ public class TripServiceImpl implements TripService {
                         trip.getStartDate(),
                         trip.getEndDate(),
                         trip.getUserId(),
-                        getDestinationImageLink(trip.getDestination())));
+                        getDestinationImageLink(trip.getDestination()),
+                        tripUsersRepository.findAllByTripId(trip.getTripId())));
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
