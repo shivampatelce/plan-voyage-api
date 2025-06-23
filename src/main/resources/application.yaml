@@ -32,7 +32,7 @@ keycloak:
     realm: plan-voyage
     auth-server-url: http://localhost:8081
     admin-client-id: admin-cli
-    admin-client-secret: LbQ5EeB9YTy4DORqAA54b1vVPX9eGPyL
+    admin-client-secret: z9Ejd5Gng2ibmMfTLmGT2ZTiwfJV4S04
 
 pixabay:
   api-key: 44181418-16a2ddd1b661940d12919d058
