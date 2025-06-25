@@ -5,7 +5,19 @@ spring:
   application:
     name: plan-voyage
 
-#    Database
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: spshivampatel456@gmail.com
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  #    Database
   datasource:
     url: jdbc:mysql://localhost:3306/plan_voyage
     username: root
