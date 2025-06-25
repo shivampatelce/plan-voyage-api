@@ -38,6 +38,10 @@ public class Trip {
     @JsonIgnore
     private List<ToDoTask> toDoTasks = new ArrayList<>();
 
+    @OneToMany(mappedBy = "tripListId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<TripList> tripLists = new ArrayList<>();
+
     public Trip() {}
 
     public Trip(String destination, Date startDate, Date endDate, String userId) {
@@ -83,6 +87,18 @@ public class Trip {
         this.invitations = invitations;
         this.tripUsers = tripUsers;
         this.toDoTasks = toDoTasks;
+    }
+
+    public Trip(UUID tripId, String destination, Date startDate, Date endDate, String userId, List<InviteUserRequests> invitations, List<TripUsers> tripUsers, List<ToDoTask> toDoTasks, List<TripList> tripLists) {
+        this.tripId = tripId;
+        this.destination = destination;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.userId = userId;
+        this.invitations = invitations;
+        this.tripUsers = tripUsers;
+        this.toDoTasks = toDoTasks;
+        this.tripLists = tripLists;
     }
 
     public UUID getTripId() {
@@ -147,5 +163,13 @@ public class Trip {
 
     public void setToDoTasks(List<ToDoTask> toDoTasks) {
         this.toDoTasks = toDoTasks;
+    }
+
+    public List<TripList> getTripLists() {
+        return tripLists;
+    }
+
+    public void setTripLists(List<TripList> tripLists) {
+        this.tripLists = tripLists;
     }
 }
