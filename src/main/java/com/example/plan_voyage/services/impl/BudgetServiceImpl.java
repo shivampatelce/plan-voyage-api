@@ -1,17 +1,8 @@
 package com.example.plan_voyage.services.impl;
 
-import com.example.plan_voyage.dto.AddExpenseReqDto;
-import com.example.plan_voyage.dto.SetBudgetReqDto;
-import com.example.plan_voyage.dto.SettlementsResDto;
-import com.example.plan_voyage.dto.UpdateBudgetDto;
-import com.example.plan_voyage.entity.Budget;
-import com.example.plan_voyage.entity.Expense;
-import com.example.plan_voyage.entity.SplitDetail;
-import com.example.plan_voyage.entity.Trip;
-import com.example.plan_voyage.repository.BudgetRepository;
-import com.example.plan_voyage.repository.ExpenseRepository;
-import com.example.plan_voyage.repository.SplitDetailRepository;
-import com.example.plan_voyage.repository.TripRepository;
+import com.example.plan_voyage.dto.*;
+import com.example.plan_voyage.entity.*;
+import com.example.plan_voyage.repository.*;
 import com.example.plan_voyage.services.BudgetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +23,9 @@ public class BudgetServiceImpl implements BudgetService {
 
     @Autowired
     private ExpenseRepository expenseRepository;
+
+    @Autowired
+    private SettlementRepository settlementRepository;
 
     @Override
     public Budget setBudget(SetBudgetReqDto setBudgetReqDto) {
@@ -119,13 +113,46 @@ public class BudgetServiceImpl implements BudgetService {
             }
         }
 
+        List<Settlement> settlements = budget.getSettlements();
+
+        for(Settlement settlement : settlements) {
+            if(settlement.getPayer().equals(userId)) {
+                double amount = settlementMap.getOrDefault(settlement.getPayee(), 0.0);
+                settlementMap.put(settlement.getPayee(), amount + settlement.getAmount());
+            } else {
+                double amount = settlementMap.getOrDefault(settlement.getPayer(), 0.0);
+                if(amount < 0) {
+                    settlementMap.put(settlement.getPayer(), amount + settlement.getAmount());
+                } else {
+                    settlementMap.put(settlement.getPayer(), amount - settlement.getAmount());
+                }
+            }
+        }
+
         List<SettlementsResDto> settlementList = new ArrayList<>();
 
         settlementMap.forEach((user, amount) -> {
-            settlementList.add(new SettlementsResDto(user, amount));
+            if(amount != 0){
+                settlementList.add(new SettlementsResDto(user, amount));
+            }
         });
 
         return settlementList;
+    }
+
+    @Override
+    public Settlement newSettlement(NewSettlementReqDto newSettlementReqDto) {
+        Trip trip = tripRepository.findById(newSettlementReqDto.getTripId())
+                .orElseThrow(() -> new RuntimeException("Invalid Trip Id"));
+
+        Budget budget = budgetRepository.findByTrip(trip);
+
+        Settlement settlement = new Settlement(newSettlementReqDto.getPayer(),
+                                                newSettlementReqDto.getPayee(),
+                                                newSettlementReqDto.getAmount(),
+                                                budget);
+
+        return settlementRepository.save(settlement);
     }
 
 }

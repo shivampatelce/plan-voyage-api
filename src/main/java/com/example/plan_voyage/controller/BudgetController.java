@@ -3,6 +3,7 @@ package com.example.plan_voyage.controller;
 import com.example.plan_voyage.dto.*;
 import com.example.plan_voyage.entity.Budget;
 import com.example.plan_voyage.entity.Expense;
+import com.example.plan_voyage.entity.Settlement;
 import com.example.plan_voyage.services.BudgetService;
 import com.example.plan_voyage.util.BaseController;
 import com.example.plan_voyage.util.SuccessMessageResponse;
@@ -81,5 +82,16 @@ public class BudgetController extends BaseController {
             return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/budget/get-settlements");
         }
         return success(settlementList, "List of settlements");
+    }
+
+    @PostMapping("/settlement")
+    public ResponseEntity<SuccessResponse<Settlement>> newSettlement(@RequestBody NewSettlementReqDto newSettlementReqDto) {
+        Settlement settlement;
+        try {
+            settlement = budgetService.newSettlement(newSettlementReqDto);
+        } catch (Exception e) {
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/budget/get-settlements");
+        }
+        return success(settlement, "New settlement has been done.");
     }
 }

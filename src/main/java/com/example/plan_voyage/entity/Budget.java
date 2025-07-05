@@ -27,6 +27,9 @@ public class Budget {
     @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Expense> expenses = new ArrayList<>();
 
+    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Settlement> settlements = new ArrayList<>();
+
     public Budget() {
     }
 
@@ -40,6 +43,14 @@ public class Budget {
         this.totalBudget = totalBudget;
         this.trip = trip;
         this.expenses = expenses;
+    }
+
+    public Budget(UUID id, Double totalBudget, Trip trip, List<Expense> expenses, List<Settlement> settlements) {
+        this.id = id;
+        this.totalBudget = totalBudget;
+        this.trip = trip;
+        this.expenses = expenses;
+        this.settlements = settlements;
     }
 
     public UUID getId() {
@@ -72,5 +83,13 @@ public class Budget {
 
     public void setExpenses(List<Expense> expenses) {
         this.expenses = expenses;
+    }
+
+    public List<Settlement> getSettlements() {
+        return settlements;
+    }
+
+    public void setSettlements(List<Settlement> settlements) {
+        this.settlements = settlements;
     }
 }
