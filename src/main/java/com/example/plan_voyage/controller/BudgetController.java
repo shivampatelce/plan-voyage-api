@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -90,8 +91,40 @@ public class BudgetController extends BaseController {
         try {
             settlement = budgetService.newSettlement(newSettlementReqDto);
         } catch (Exception e) {
-            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/budget/get-settlements");
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/budget/settlements");
         }
         return success(settlement, "New settlement has been done.");
+    }
+
+    @GetMapping("/settlement-activities/{tripId}")
+    public ResponseEntity<List<Settlement>> settlementActivities(@PathVariable UUID tripId) {
+        List<Settlement> settlements;
+        try {
+            settlements = budgetService.settlementActivities(tripId);
+        } catch (Exception e) {
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/budget/settlement-activities/" + tripId);
+        }
+        return success(settlements, "Settlement activities list.");
+    }
+
+    @PutMapping("/edit-settlement-activity")
+    public ResponseEntity<Settlement> editSettlement(@RequestBody EditSettlementDto editSettlementDto) {
+        Settlement settlement;
+        try {
+            settlement = budgetService.editSettlementActivity(editSettlementDto);
+        } catch (Exception e) {
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/budget/edit-settlement-activity");
+        }
+        return success(settlement, "Settlement activity has been edited.");
+    }
+
+    @DeleteMapping("/delete-settlement-activity/{settlementId}")
+    public ResponseEntity<SuccessMessageResponse> deleteSettlement(@PathVariable UUID settlementId) {
+        try {
+            budgetService.deleteSettlementActivity(settlementId);
+        } catch (Exception e) {
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/budget/delete-settlement-activity/" + settlementId);
+        }
+        return success("Settlement has been deleted.");
     }
 }

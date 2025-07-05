@@ -155,4 +155,32 @@ public class BudgetServiceImpl implements BudgetService {
         return settlementRepository.save(settlement);
     }
 
+    @Override
+    public List<Settlement> settlementActivities(UUID tripId) {
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new RuntimeException("Invalid Trip Id"));
+
+        Budget budget = budgetRepository.findByTrip(trip);
+
+        return budget.getSettlements();
+    }
+
+    @Override
+    public void deleteSettlementActivity(UUID settlementId) {
+        settlementRepository.deleteById(settlementId);
+    }
+
+    @Override
+    public Settlement editSettlementActivity(EditSettlementDto editSettlementDto) {
+
+        Settlement settlement = settlementRepository.findById(editSettlementDto.getSettlementId())
+                .orElseThrow(()-> new RuntimeException("Invalid settlement id: " + editSettlementDto.getSettlementId()));
+
+        settlement.setPayee(editSettlementDto.getPayee());
+        settlement.setPayer(editSettlementDto.getPayer());
+        settlement.setAmount(editSettlementDto.getAmount());
+
+        return settlementRepository.save(settlement);
+    }
+
 }

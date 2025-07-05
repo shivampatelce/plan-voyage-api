@@ -22,4 +22,10 @@ public interface BudgetService {
     List<SettlementsResDto> calculateSettlements(String userId, UUID tripId);
 
     Settlement newSettlement(NewSettlementReqDto newSettlementReqDto);
+
+    List<Settlement> settlementActivities(UUID tripId);
+
+    void deleteSettlementActivity(UUID settlementId);
+
+    Settlement editSettlementActivity(EditSettlementDto editSettlementDto);
 }
