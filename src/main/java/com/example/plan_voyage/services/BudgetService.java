@@ -2,6 +2,7 @@ package com.example.plan_voyage.services;
 
 import com.example.plan_voyage.dto.AddExpenseReqDto;
 import com.example.plan_voyage.dto.SetBudgetReqDto;
+import com.example.plan_voyage.dto.SettlementsResDto;
 import com.example.plan_voyage.dto.UpdateBudgetDto;
 import com.example.plan_voyage.entity.Budget;
 import com.example.plan_voyage.entity.Expense;
@@ -19,4 +20,6 @@ public interface BudgetService {
     Expense addExpense(AddExpenseReqDto addExpenseReqDto);
 
     void deleteExpense(UUID expenseId);
+
+    List<SettlementsResDto> calculateSettlements(String userId, UUID tripId);
 }

@@ -2,6 +2,7 @@ package com.example.plan_voyage.services.impl;
 
 import com.example.plan_voyage.dto.AddExpenseReqDto;
 import com.example.plan_voyage.dto.SetBudgetReqDto;
+import com.example.plan_voyage.dto.SettlementsResDto;
 import com.example.plan_voyage.dto.UpdateBudgetDto;
 import com.example.plan_voyage.entity.Budget;
 import com.example.plan_voyage.entity.Expense;
@@ -15,9 +16,7 @@ import com.example.plan_voyage.services.BudgetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class BudgetServiceImpl implements BudgetService {
@@ -89,4 +88,44 @@ public class BudgetServiceImpl implements BudgetService {
     public void deleteExpense(UUID expenseId) {
         expenseRepository.deleteById(expenseId);
     }
+
+    @Override
+    public List<SettlementsResDto> calculateSettlements(String userId, UUID tripId) {
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new RuntimeException("Invalid Trip Id"));
+
+        Budget budget = budgetRepository.findByTrip(trip);
+        List<Expense> expenses = budget.getExpenses();
+
+        Map<String, Double> settlementMap = new HashMap<>();
+
+        for (Expense expense : expenses) {
+            // If the given user paid for the expense
+            if (expense.getPaidBy().equals(userId)) {
+                for (SplitDetail split : expense.getSplitDetails()) {
+                    if (!split.getUserId().equals(userId)) {
+                        double currentAmount = settlementMap.getOrDefault(split.getUserId(), 0.0);
+                        settlementMap.put(split.getUserId(), currentAmount + split.getAmount());
+                    }
+                }
+            } else {
+                // If someone else paid, check if the given user owes them
+                for (SplitDetail split : expense.getSplitDetails()) {
+                    if (split.getUserId().equals(userId)) {
+                        double currentAmount = settlementMap.getOrDefault(expense.getPaidBy(), 0.0);
+                        settlementMap.put(expense.getPaidBy(), currentAmount - split.getAmount());
+                    }
+                }
+            }
+        }
+
+        List<SettlementsResDto> settlementList = new ArrayList<>();
+
+        settlementMap.forEach((user, amount) -> {
+            settlementList.add(new SettlementsResDto(user, amount));
+        });
+
+        return settlementList;
+    }
+
 }

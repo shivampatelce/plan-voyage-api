@@ -1,8 +1,6 @@
 package com.example.plan_voyage.controller;
 
-import com.example.plan_voyage.dto.AddExpenseReqDto;
-import com.example.plan_voyage.dto.SetBudgetReqDto;
-import com.example.plan_voyage.dto.UpdateBudgetDto;
+import com.example.plan_voyage.dto.*;
 import com.example.plan_voyage.entity.Budget;
 import com.example.plan_voyage.entity.Expense;
 import com.example.plan_voyage.services.BudgetService;
@@ -74,4 +72,14 @@ public class BudgetController extends BaseController {
         return success("Expense has been deleted successfully.");
     }
 
+    @PostMapping("/get-settlements")
+    public ResponseEntity<SuccessResponse<List<SettlementsResDto>>> getSettlements(@RequestBody GetSettlementsReqDto getSettlementsReqDto){
+        List<SettlementsResDto> settlementList;
+        try {
+            settlementList = budgetService.calculateSettlements(getSettlementsReqDto.getUserId(), getSettlementsReqDto.getTripId());
+        } catch (Exception e) {
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/budget/get-settlements");
+        }
+        return success(settlementList, "List of settlements");
+    }
 }
