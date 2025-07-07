@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -66,6 +65,17 @@ public class BudgetController extends BaseController {
             return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/budget/add-expense");
         }
         return success(expense, "Expense has been added for trip");
+    }
+
+    @PutMapping("/edit-expense")
+    public ResponseEntity<SuccessResponse<Expense>> editExpense(@RequestBody EditExpenseReqDto editExpenseReqDto) {
+        Expense expense;
+        try {
+            expense = budgetService.editExpense(editExpenseReqDto);
+        } catch (Exception e) {
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/budget/edit-expense");
+        }
+        return success(expense, "Expense has been updated for trip");
     }
 
     @DeleteMapping("/delete-expense/{expenseId}")

@@ -28,4 +28,6 @@ public interface BudgetService {
     void deleteSettlementActivity(UUID settlementId);
 
     Settlement editSettlementActivity(EditSettlementDto editSettlementDto);
+
+    Expense editExpense(EditExpenseReqDto editExpenseReqDto);
 }

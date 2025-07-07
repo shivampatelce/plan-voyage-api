@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BudgetServiceImpl implements BudgetService {
@@ -77,6 +78,59 @@ public class BudgetServiceImpl implements BudgetService {
 
         return expense;
     }
+
+    @Override
+    public Expense editExpense(EditExpenseReqDto editExpenseReqDto) {
+        Expense expense = expenseRepository.findById(editExpenseReqDto.getExpenseId())
+                .orElseThrow(() -> new RuntimeException("Invalid expense id"));
+
+        // Load existing split details
+        List<SplitDetail> existingSplitDetails = new ArrayList<>(expense.getSplitDetails());
+
+        // IDs coming from the request
+        Set<UUID> incomingSplitDetailIds = editExpenseReqDto.getSplitDetails().stream()
+                .map(EditSplitDetailDto::getSplitDetailId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        // Delete removed split details
+        for (SplitDetail existing : existingSplitDetails) {
+            if (!incomingSplitDetailIds.contains(existing.getSplitDetailId())) {
+                splitDetailRepository.delete(existing);
+            }
+        }
+
+        // Clear current split details to reassign
+        expense.getSplitDetails().clear();
+
+        // Add or update split details
+        for (EditSplitDetailDto dto : editExpenseReqDto.getSplitDetails()) {
+            SplitDetail splitDetail;
+
+            if (dto.getSplitDetailId() == null) {
+                // New
+                splitDetail = new SplitDetail(dto.getUserId(), dto.getAmount(), expense);
+            } else {
+                // Existing
+                splitDetail = splitDetailRepository.findById(dto.getSplitDetailId())
+                        .orElseThrow(() -> new RuntimeException("Invalid split detail ID"));
+                splitDetail.setUserId(dto.getUserId());
+                splitDetail.setAmount(dto.getAmount());
+            }
+
+            expense.getSplitDetails().add(splitDetail);
+        }
+
+        // Update other fields
+        expense.setTitle(editExpenseReqDto.getTitle());
+        expense.setAmount(editExpenseReqDto.getAmount());
+        expense.setCategory(editExpenseReqDto.getCategory());
+        expense.setDate(editExpenseReqDto.getDate());
+        expense.setPaidBy(editExpenseReqDto.getPaidBy());
+
+        return expenseRepository.save(expense);
+    }
+
 
     @Override
     public void deleteExpense(UUID expenseId) {

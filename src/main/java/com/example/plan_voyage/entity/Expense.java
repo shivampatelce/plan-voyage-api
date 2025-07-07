@@ -33,7 +33,7 @@ public class Expense {
     @JsonIgnore
     private Budget budget;
 
-    @OneToMany(mappedBy = "expense", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "expense", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<SplitDetail> splitDetails = new ArrayList<>();
 
     public Expense() {
