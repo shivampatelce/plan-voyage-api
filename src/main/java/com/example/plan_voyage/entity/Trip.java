@@ -46,6 +46,10 @@ public class Trip {
     @JsonIgnore
     private Budget budget;
 
+    @OneToMany(mappedBy = "itineraryId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Itinerary> itineraries = new ArrayList<>();
+
     public Trip() {}
 
     public Trip(String destination, Date startDate, Date endDate, String userId) {
@@ -116,6 +120,20 @@ public class Trip {
         this.toDoTasks = toDoTasks;
         this.tripLists = tripLists;
         this.budget = budget;
+    }
+
+    public Trip(UUID tripId, String destination, Date startDate, Date endDate, String userId, List<InviteUserRequests> invitations, List<TripUsers> tripUsers, List<ToDoTask> toDoTasks, List<TripList> tripLists, Budget budget, List<Itinerary> itineraries) {
+        this.tripId = tripId;
+        this.destination = destination;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.userId = userId;
+        this.invitations = invitations;
+        this.tripUsers = tripUsers;
+        this.toDoTasks = toDoTasks;
+        this.tripLists = tripLists;
+        this.budget = budget;
+        this.itineraries = itineraries;
     }
 
     public UUID getTripId() {
@@ -196,5 +214,13 @@ public class Trip {
 
     public void setBudget(Budget budget) {
         this.budget = budget;
+    }
+
+    public List<Itinerary> getItineraries() {
+        return itineraries;
+    }
+
+    public void setItineraries(List<Itinerary> itineraries) {
+        this.itineraries = itineraries;
     }
 }

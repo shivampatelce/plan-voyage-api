@@ -58,7 +58,7 @@ public class BudgetServiceImpl implements BudgetService {
     @Override
     public Expense addExpense(AddExpenseReqDto addExpenseReqDto) {
         Trip trip = tripRepository.findById(addExpenseReqDto.getTripId())
-                .orElseThrow(()-> new RuntimeException("Invalid Trip Id"));
+                .orElseThrow(() -> new RuntimeException("Invalid Trip Id"));
 
         Budget budget = budgetRepository.findByTrip(trip);
 
