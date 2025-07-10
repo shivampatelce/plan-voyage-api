@@ -30,4 +30,6 @@ public interface TripService {
     void joinTrip(JoinTripReqDto joinTripReqDto);
 
     void exitFromTrip(ExitTripReqDto exitTripReqDto);
+
+    List<TripResDto> relatedTripList(String placeName, UUID tripId);
 }

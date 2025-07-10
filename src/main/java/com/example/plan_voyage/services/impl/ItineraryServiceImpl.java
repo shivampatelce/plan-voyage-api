@@ -135,8 +135,4 @@ public class ItineraryServiceImpl implements ItineraryService {
         itineraryPlaceRepository.deleteById(placeId);
     }
 
-    @Override
-    public List<Trip> relatedTripList(String placeName) {
-        return tripRepository.findByDestination(placeName);
-    }
 }

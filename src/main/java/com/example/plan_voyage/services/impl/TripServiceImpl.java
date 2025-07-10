@@ -2,9 +2,11 @@ package com.example.plan_voyage.services.impl;
 
 import com.example.plan_voyage.dto.*;
 import com.example.plan_voyage.entity.InviteUserRequests;
+import com.example.plan_voyage.entity.Itinerary;
 import com.example.plan_voyage.entity.Trip;
 import com.example.plan_voyage.entity.TripUsers;
 import com.example.plan_voyage.repository.InviteUserRepository;
+import com.example.plan_voyage.repository.ItineraryRepository;
 import com.example.plan_voyage.repository.TripRepository;
 import com.example.plan_voyage.repository.TripUsersRepository;
 import com.example.plan_voyage.services.KeycloakService;
@@ -44,6 +46,9 @@ public class TripServiceImpl implements TripService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private ItineraryRepository itineraryRepository;
 
     @Override
     public Trip createTrip(CreateTripReqDto createTripReqDto) {
@@ -211,6 +216,43 @@ public class TripServiceImpl implements TripService {
     @Override
     public void exitFromTrip(ExitTripReqDto exitTripReqDto) {
         tripUsersRepository.deleteByTripIdAndUserId(exitTripReqDto.getTripId(), exitTripReqDto.getUserId());
+    }
+
+    @Override
+    public List<TripResDto> relatedTripList(String placeName, UUID tripId) {
+        List<Trip> trips = tripRepository.findByDestinationContainingIgnoreCase(placeName).stream()
+                .filter((trip)-> {
+                    if(!trip.getTripId().equals(tripId)) {
+                        List<Itinerary> itineraries = itineraryRepository.findAllByTrip(trip);
+                        for(Itinerary itinerary: itineraries) {
+                            if(!itinerary.getItineraryPlaces().isEmpty()) {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                }).toList();
+
+        List<TripResDto> tripResDtoList = new ArrayList<>();
+
+        trips.stream().forEach(trip -> {
+            try {
+                tripResDtoList.add(new TripResDto(trip.getTripId(),
+                        trip.getDestination(),
+                        trip.getStartDate(),
+                        trip.getEndDate(),
+                        trip.getUserId(),
+                        getDestinationImageLink(trip.getDestination())));
+            } catch (JSONException e) {
+                tripResDtoList.add(new TripResDto(trip.getTripId(),
+                        trip.getDestination(),
+                        trip.getStartDate(),
+                        trip.getEndDate(),
+                        trip.getUserId(),
+                        null));
+            }
+        });
+        return tripResDtoList;
     }
 
 }

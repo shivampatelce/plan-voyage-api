@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@PermitAll
 @RestController
 @RequestMapping("/v1/shared-itinerary")
 public class SharedItineraryController extends BaseController {
@@ -27,7 +26,6 @@ public class SharedItineraryController extends BaseController {
     @Autowired
     private TripService tripService;
 
-    @PermitAll
     @GetMapping("/{tripId}")
     public ResponseEntity<SuccessResponse<List<Itinerary>>> itineraryList(@PathVariable UUID tripId) {
         List<Itinerary> itineraries;
@@ -39,19 +37,17 @@ public class SharedItineraryController extends BaseController {
         return success(itineraries, "List of itinerary.");
     }
 
-    @PermitAll
-    @PostMapping("/related-trip-list/{placeName}")
-    public ResponseEntity<SuccessResponse<List<Trip>>> relatedTripList(String placeName) {
-        List<Trip> tripList;
+    @PostMapping("/related-trip-list/{placeName}/{tripId}")
+    public ResponseEntity<SuccessResponse<List<TripResDto>>> relatedTripList(@PathVariable  String placeName, @PathVariable UUID tripId) {
+        List<TripResDto> tripList;
         try{
-            tripList = itineraryService.relatedTripList(placeName);
+            tripList = tripService.relatedTripList(placeName, tripId);
         } catch (Exception e) {
-            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/related-trip-list/" + placeName);
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/related-trip-list/" + placeName + "/" + tripId);
         }
         return success(tripList, "Related trip list");
     }
 
-    @PermitAll
     @GetMapping("/trip-overview/{tripId}")
     public ResponseEntity<SuccessResponse<TripResDto>> tripOverView(@PathVariable UUID tripId) {
         TripResDto trip = null;

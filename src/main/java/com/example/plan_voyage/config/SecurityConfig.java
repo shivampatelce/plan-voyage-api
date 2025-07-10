@@ -35,7 +35,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain publicEndpoints(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/v1/shared-itinerary/**") // Only match this path
+                .securityMatcher("/v1/shared-itinerary/*", "/v1/shared-itinerary/trip-overview/*")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth

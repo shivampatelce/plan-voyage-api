@@ -13,6 +13,4 @@ public interface ItineraryService {
     Itinerary addItinerary(AddItineraryReqDto addItineraryReqDto);
 
     void removePlace(UUID placeId);
-
-    List<Trip> relatedTripList(String placeName);
 }
