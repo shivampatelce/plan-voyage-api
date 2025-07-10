@@ -42,6 +42,9 @@ public class TripServiceImpl implements TripService {
     @Autowired
     private KeycloakService keycloakService;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Override
     public Trip createTrip(CreateTripReqDto createTripReqDto) {
         Trip trip = new Trip(createTripReqDto.getDestination(),
@@ -125,7 +128,6 @@ public class TripServiceImpl implements TripService {
     }
 
     private String getDestinationImageLink(String destination) throws JSONException {
-        RestTemplate restTemplate = new RestTemplate();
         String url = "https://pixabay.com/api/?key=" + pixabayApiKey + "&q=" + destination + "+place&image_type=photo";
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);

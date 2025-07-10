@@ -21,6 +21,9 @@ public class ItineraryPlace {
 
     private String time;
 
+    @OneToOne(mappedBy = "itineraryPlace", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Coordinates coordinates;
+
     @ManyToOne
     @JoinColumn(name = "itinerary_id", nullable = false)
     @JsonProperty("itinerary")
@@ -83,5 +86,13 @@ public class ItineraryPlace {
 
     public void setItinerary(Itinerary itinerary) {
         this.itinerary = itinerary;
+    }
+
+    public Coordinates getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(Coordinates coordinates) {
+        this.coordinates = coordinates;
     }
 }

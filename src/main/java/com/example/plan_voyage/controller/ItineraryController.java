@@ -2,6 +2,7 @@ package com.example.plan_voyage.controller;
 
 import com.example.plan_voyage.dto.AddItineraryReqDto;
 import com.example.plan_voyage.entity.Itinerary;
+import com.example.plan_voyage.entity.Trip;
 import com.example.plan_voyage.services.ItineraryService;
 import com.example.plan_voyage.util.BaseController;
 import com.example.plan_voyage.util.SuccessMessageResponse;

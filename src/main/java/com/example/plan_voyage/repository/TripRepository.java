@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface TripRepository extends JpaRepository<Trip, UUID> {
     List<Trip> findByUserId(String userId);
+
+    List<Trip> findByDestination(String placeName);
 }
