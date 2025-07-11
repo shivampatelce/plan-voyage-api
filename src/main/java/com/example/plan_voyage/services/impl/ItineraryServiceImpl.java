@@ -1,6 +1,7 @@
 package com.example.plan_voyage.services.impl;
 
 import com.example.plan_voyage.dto.AddItineraryReqDto;
+import com.example.plan_voyage.dto.AddPlaceNoteReqDto;
 import com.example.plan_voyage.entity.Coordinates;
 import com.example.plan_voyage.entity.Itinerary;
 import com.example.plan_voyage.entity.ItineraryPlace;
@@ -133,6 +134,16 @@ public class ItineraryServiceImpl implements ItineraryService {
     @Override
     public void removePlace(UUID placeId) {
         itineraryPlaceRepository.deleteById(placeId);
+    }
+
+    @Override
+    public ItineraryPlace addPlaceNote(AddPlaceNoteReqDto addPlaceNoteReqDto) {
+        ItineraryPlace itineraryPlace = itineraryPlaceRepository.findById(addPlaceNoteReqDto.getItineraryPlaceId())
+                .orElseThrow(() -> new RuntimeException("Invalid id: " + addPlaceNoteReqDto.getItineraryPlaceId()));
+
+        itineraryPlace.setNotes(addPlaceNoteReqDto.getNotes());
+
+        return itineraryPlaceRepository.save(itineraryPlace);
     }
 
 }

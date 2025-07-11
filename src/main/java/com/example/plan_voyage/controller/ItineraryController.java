@@ -1,7 +1,9 @@
 package com.example.plan_voyage.controller;
 
 import com.example.plan_voyage.dto.AddItineraryReqDto;
+import com.example.plan_voyage.dto.AddPlaceNoteReqDto;
 import com.example.plan_voyage.entity.Itinerary;
+import com.example.plan_voyage.entity.ItineraryPlace;
 import com.example.plan_voyage.entity.Trip;
 import com.example.plan_voyage.services.ItineraryService;
 import com.example.plan_voyage.util.BaseController;
@@ -42,6 +44,17 @@ public class ItineraryController extends BaseController {
             return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/add-itinerary");
         }
         return success(itinerary, "Itinerary has been added.");
+    }
+
+    @PutMapping("/add-notes")
+    public ResponseEntity<SuccessResponse<ItineraryPlace>> addNotes(@RequestBody AddPlaceNoteReqDto addPlaceNoteReqDto) {
+        ItineraryPlace itineraryPlace;
+        try {
+            itineraryPlace = itineraryService.addPlaceNote(addPlaceNoteReqDto);
+        } catch (Exception e) {
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/add-notes");
+        }
+        return success(itineraryPlace, "Itinerary place notes has been added.");
     }
 
     @DeleteMapping("/remove-place/{placeId}")

@@ -21,6 +21,8 @@ public class ItineraryPlace {
 
     private String time;
 
+    private String notes;
+
     @OneToOne(mappedBy = "itineraryPlace", cascade = CascadeType.ALL, orphanRemoval = true)
     private Coordinates coordinates;
 
@@ -45,6 +47,16 @@ public class ItineraryPlace {
         this.place = place;
         this.category = category;
         this.time = time;
+        this.itinerary = itinerary;
+    }
+
+    public ItineraryPlace(UUID id, String place, String category, String time, String notes, Coordinates coordinates, Itinerary itinerary) {
+        this.id = id;
+        this.place = place;
+        this.category = category;
+        this.time = time;
+        this.notes = notes;
+        this.coordinates = coordinates;
         this.itinerary = itinerary;
     }
 
@@ -94,5 +106,13 @@ public class ItineraryPlace {
 
     public void setCoordinates(Coordinates coordinates) {
         this.coordinates = coordinates;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }
