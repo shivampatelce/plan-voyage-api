@@ -1,5 +1,6 @@
 package com.example.plan_voyage.dto;
 
+import com.example.plan_voyage.entity.ItineraryRating;
 import com.example.plan_voyage.entity.TripUsers;
 
 import java.util.Date;
@@ -18,6 +19,10 @@ public class TripResDto {
     private String userId;
 
     private String destinationImageUrl;
+
+    private double rating;
+
+    private String creatorName;
 
     private List<UserDetailsDto> tripUsers;
 
@@ -38,6 +43,17 @@ public class TripResDto {
         this.userId = userId;
         this.destinationImageUrl = destinationImageUrl;
         this.tripUsers = tripUsers;
+    }
+
+    public TripResDto(UUID tripId, String destination, Date startDate, Date endDate, String userId, String destinationImageUrl, double rating, String creatorName) {
+        this.tripId = tripId;
+        this.destination = destination;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.userId = userId;
+        this.destinationImageUrl = destinationImageUrl;
+        this.rating = rating;
+        this.creatorName = creatorName;
     }
 
     public UUID getTripId() {
@@ -86,6 +102,22 @@ public class TripResDto {
 
     public void setDestinationImageUrl(String destinationImageUrl) {
         this.destinationImageUrl = destinationImageUrl;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
     }
 
     public List<UserDetailsDto> getTripUsers() {

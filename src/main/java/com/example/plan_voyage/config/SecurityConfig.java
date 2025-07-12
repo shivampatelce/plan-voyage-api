@@ -35,7 +35,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain publicEndpoints(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/v1/shared-itinerary/*", "/v1/shared-itinerary/trip-overview/*")
+                .securityMatcher("/v1/shared-itinerary/*", "/v1/shared-itinerary/trip-overview/*", "v1/itinerary/itinerary-rating-list/*")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth

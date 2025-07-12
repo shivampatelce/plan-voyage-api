@@ -1,16 +1,13 @@
 package com.example.plan_voyage.services.impl;
 
+import com.example.plan_voyage.dto.AddItineraryRatingReqDto;
 import com.example.plan_voyage.dto.AddItineraryReqDto;
 import com.example.plan_voyage.dto.AddPlaceNoteReqDto;
-import com.example.plan_voyage.entity.Coordinates;
-import com.example.plan_voyage.entity.Itinerary;
-import com.example.plan_voyage.entity.ItineraryPlace;
-import com.example.plan_voyage.entity.Trip;
-import com.example.plan_voyage.repository.CoordinatesRepository;
-import com.example.plan_voyage.repository.ItineraryPlaceRepository;
-import com.example.plan_voyage.repository.ItineraryRepository;
-import com.example.plan_voyage.repository.TripRepository;
+import com.example.plan_voyage.entity.*;
+import com.example.plan_voyage.repository.*;
 import com.example.plan_voyage.services.ItineraryService;
+import com.example.plan_voyage.services.KeycloakService;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.configurationprocessor.json.JSONException;
@@ -38,6 +35,12 @@ public class ItineraryServiceImpl implements ItineraryService {
 
     @Autowired
     private CoordinatesRepository coordinatesRepository;
+
+    @Autowired
+    private ItineraryRatingRepository itineraryRatingRepository;
+
+    @Autowired
+    private KeycloakService keycloakService;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -144,6 +147,40 @@ public class ItineraryServiceImpl implements ItineraryService {
         itineraryPlace.setNotes(addPlaceNoteReqDto.getNotes());
 
         return itineraryPlaceRepository.save(itineraryPlace);
+    }
+
+    @Override
+    public ItineraryRating addItineraryRating(AddItineraryRatingReqDto addItineraryRatingReqDto) {
+        if(addItineraryRatingReqDto.getItineraryRatingId() == null) {
+            Trip trip = tripRepository.findById(addItineraryRatingReqDto.getTripId())
+                    .orElseThrow(() -> new RuntimeException("Invalid trip id"));
+
+            UserRepresentation userInfo = keycloakService.getUserById(addItineraryRatingReqDto.getUserId());
+
+            return itineraryRatingRepository.save(
+                    new ItineraryRating(addItineraryRatingReqDto.getRating(),
+                            addItineraryRatingReqDto.getComment(),
+                            addItineraryRatingReqDto.getUserId(),
+                            userInfo.getFirstName() + " " + userInfo.getLastName(),
+                            trip)
+            );
+        } else {
+            ItineraryRating itineraryRating = itineraryRatingRepository.findById(addItineraryRatingReqDto.getItineraryRatingId())
+                                                                        .orElseThrow(()-> new RuntimeException("Invalid rating id"));
+
+            itineraryRating.setComment(addItineraryRatingReqDto.getComment());
+            itineraryRating.setRating(addItineraryRatingReqDto.getRating());
+
+            return itineraryRatingRepository.save(itineraryRating);
+        }
+    }
+
+    @Override
+    public List<ItineraryRating> getItineraryRatingList(UUID tripId) {
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(()->new RuntimeException("Invalid trip id"));
+
+        return itineraryRatingRepository.findAllByTrip(trip);
     }
 
 }

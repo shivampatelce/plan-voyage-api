@@ -1,10 +1,11 @@
 package com.example.plan_voyage.controller;
 
+import com.example.plan_voyage.dto.AddItineraryRatingReqDto;
 import com.example.plan_voyage.dto.AddItineraryReqDto;
 import com.example.plan_voyage.dto.AddPlaceNoteReqDto;
 import com.example.plan_voyage.entity.Itinerary;
 import com.example.plan_voyage.entity.ItineraryPlace;
-import com.example.plan_voyage.entity.Trip;
+import com.example.plan_voyage.entity.ItineraryRating;
 import com.example.plan_voyage.services.ItineraryService;
 import com.example.plan_voyage.util.BaseController;
 import com.example.plan_voyage.util.SuccessMessageResponse;
@@ -61,6 +62,28 @@ public class ItineraryController extends BaseController {
     public ResponseEntity<SuccessMessageResponse> removePlace(@PathVariable UUID placeId) {
         itineraryService.removePlace(placeId);
         return success("Place has been removed.");
+    }
+
+    @PostMapping("/add-itinerary-rating")
+    public ResponseEntity<SuccessResponse<ItineraryRating>> addItineraryRating(@RequestBody AddItineraryRatingReqDto addItineraryRatingReqDto) {
+        ItineraryRating itineraryRating;
+        try {
+            itineraryRating = itineraryService.addItineraryRating(addItineraryRatingReqDto);
+        } catch (Exception e) {
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/add-itinerary-rating");
+        }
+        return success(itineraryRating, "Rating for itinerary has been added.");
+    }
+
+    @GetMapping("/itinerary-rating-list/{tripId}")
+    public ResponseEntity<SuccessResponse<List<ItineraryRating>>> itineraryRatingList(@PathVariable UUID tripId) {
+        List<ItineraryRating> itineraryRatings;
+        try {
+            itineraryRatings = itineraryService.getItineraryRatingList(tripId);
+        } catch (Exception e) {
+            return error(e.getMessage(), HttpStatus.BAD_REQUEST, "/v1/itinerary-rating-list/"+tripId);
+        }
+        return success(itineraryRatings, "Itinerary rating list");
     }
 
 }

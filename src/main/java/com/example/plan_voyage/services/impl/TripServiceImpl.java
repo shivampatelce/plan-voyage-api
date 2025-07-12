@@ -1,14 +1,8 @@
 package com.example.plan_voyage.services.impl;
 
 import com.example.plan_voyage.dto.*;
-import com.example.plan_voyage.entity.InviteUserRequests;
-import com.example.plan_voyage.entity.Itinerary;
-import com.example.plan_voyage.entity.Trip;
-import com.example.plan_voyage.entity.TripUsers;
-import com.example.plan_voyage.repository.InviteUserRepository;
-import com.example.plan_voyage.repository.ItineraryRepository;
-import com.example.plan_voyage.repository.TripRepository;
-import com.example.plan_voyage.repository.TripUsersRepository;
+import com.example.plan_voyage.entity.*;
+import com.example.plan_voyage.repository.*;
 import com.example.plan_voyage.services.KeycloakService;
 import com.example.plan_voyage.services.TripService;
 import jakarta.transaction.Transactional;
@@ -49,6 +43,9 @@ public class TripServiceImpl implements TripService {
 
     @Autowired
     private ItineraryRepository itineraryRepository;
+
+    @Autowired
+    private ItineraryRatingRepository itineraryRatingRepository;
 
     @Override
     public Trip createTrip(CreateTripReqDto createTripReqDto) {
@@ -242,17 +239,38 @@ public class TripServiceImpl implements TripService {
                         trip.getStartDate(),
                         trip.getEndDate(),
                         trip.getUserId(),
-                        getDestinationImageLink(trip.getDestination())));
+                        getDestinationImageLink(trip.getDestination()),
+                        calculateRating(trip),
+                        "Shivam Patel"
+                        ));
             } catch (JSONException e) {
                 tripResDtoList.add(new TripResDto(trip.getTripId(),
                         trip.getDestination(),
                         trip.getStartDate(),
                         trip.getEndDate(),
                         trip.getUserId(),
-                        null));
+                        null,
+                        calculateRating(trip),
+                        "Shivam Patel"
+                        ));
             }
         });
         return tripResDtoList;
+    }
+
+    private double calculateRating(Trip trip) {
+        List<ItineraryRating> itineraryRatings = itineraryRatingRepository.findAllByTrip(trip);
+
+        if (itineraryRatings == null || itineraryRatings.isEmpty()) {
+            return 0.0;
+        }
+
+        double total = 0.0;
+        for (ItineraryRating rating : itineraryRatings) {
+            total += rating.getRating();
+        }
+
+        return total / itineraryRatings.size();
     }
 
 }
