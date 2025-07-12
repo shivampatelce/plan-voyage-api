@@ -73,18 +73,21 @@ public class TripServiceImpl implements TripService {
             List<UserDetailsDto> users = tripUsersRepository.findAllByTripId(trip.getTripId())
                     .stream().map(user -> getUserDetailsByUserId(user.getUserId())).toList();
 
+            String imageLink = "";
             try {
-                trips.add(new TripResDto(trip.getTripId(),
-                        trip.getDestination(),
-                        trip.getStartDate(),
-                        trip.getEndDate(),
-                        trip.getUserId(),
-                        getDestinationImageLink(trip.getDestination()),
-                        users
-                ));
+                imageLink = getDestinationImageLink(trip.getDestination());
             } catch (JSONException e) {
-                throw new RuntimeException(e);
+                System.err.println("Failed to fetch image link for destination: " + trip.getDestination());
             }
+
+            trips.add(new TripResDto(trip.getTripId(),
+                    trip.getDestination(),
+                    trip.getStartDate(),
+                    trip.getEndDate(),
+                    trip.getUserId(),
+                    imageLink,
+                    users
+            ));
         });
         return trips;
     }
@@ -97,20 +100,26 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
-    public TripResDto getTripByTripId(UUID tripId) throws JSONException {
+    public TripResDto getTripByTripId(UUID tripId) {
         Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new RuntimeException("Invalid trip id: " + tripId));
 
         List<UserDetailsDto> tripUsers = tripUsersRepository.findAllByTripId(trip.getTripId())
                 .stream().map(user -> getUserDetailsByUserId(user.getUserId())).toList();
 
-        TripResDto tripResDto = new TripResDto(trip.getTripId(),
+        String imageLink = "";
+        try {
+            imageLink = getDestinationImageLink(trip.getDestination());
+        } catch (JSONException e) {
+            System.err.println("Failed to fetch image link for destination: " + trip.getDestination());
+        }
+
+        return new TripResDto(trip.getTripId(),
                 trip.getDestination(),
                 trip.getStartDate(),
                 trip.getEndDate(),
                 trip.getUserId(),
-                getDestinationImageLink(trip.getDestination()),
+                imageLink,
                 tripUsers);
-        return tripResDto;
     }
 
     private UserDetailsDto getUserDetailsByUserId(String userId) {
@@ -161,32 +170,41 @@ public class TripServiceImpl implements TripService {
         List<InviteUserRequests> invitations = inviteUserRepository.findAllByEmailId(email);
         List<InvitationListResDto> tripInvitations = new ArrayList<>();
         for (InviteUserRequests invitation : invitations) {
+            Trip trip = invitation.getTripId();
+            String imageLink = "";
             try {
-                Trip trip = invitation.getTripId();
-                String imageLink = getDestinationImageLink(trip.getDestination());
-                tripInvitations.add(
-                        new InvitationListResDto(invitation.getInvitationId(),
-                                new TripResDto(trip.getTripId(),
-                                        trip.getDestination(),
-                                        trip.getStartDate(),
-                                        trip.getEndDate(),
-                                        trip.getUserId(),
-                                        imageLink))
-                );
+                imageLink = getDestinationImageLink(trip.getDestination());
             } catch (JSONException e) {
                 System.err.println("Failed to fetch image link for destination: " + invitation.getTripId().getDestination());
             }
+
+            tripInvitations.add(
+                    new InvitationListResDto(invitation.getInvitationId(),
+                            new TripResDto(trip.getTripId(),
+                                    trip.getDestination(),
+                                    trip.getStartDate(),
+                                    trip.getEndDate(),
+                                    trip.getUserId(),
+                                    imageLink)
+                    )
+            );
         }
         return tripInvitations;
     }
 
     @Override
-    public TripResDto getInvitationDetailByInvitation(TripInvitationDetailReqDto tripInvitationDetailReqDto) throws JSONException {
+    public TripResDto getInvitationDetailByInvitation(TripInvitationDetailReqDto tripInvitationDetailReqDto) {
         InviteUserRequests invitationRequest = inviteUserRepository.findByInvitationIdAndEmail(tripInvitationDetailReqDto.getInvitationId(), tripInvitationDetailReqDto.getEmail());
         TripResDto tripResDto;
         if (invitationRequest != null) {
             Trip trip = invitationRequest.getTripId();
-            tripResDto = new TripResDto(trip.getTripId(), trip.getDestination(), trip.getStartDate(), trip.getEndDate(), trip.getUserId(), getDestinationImageLink(trip.getDestination()));
+            String imageLink = "";
+            try {
+                imageLink = getDestinationImageLink(trip.getDestination());
+            } catch (JSONException e) {
+                System.err.println("Failed to fetch image link for destination: " + trip.getDestination());
+            }
+            tripResDto = new TripResDto(trip.getTripId(), trip.getDestination(), trip.getStartDate(), trip.getEndDate(), trip.getUserId(), imageLink);
         } else {
             throw new RuntimeException("Invitation not found. It may have been deleted, or the associated trip plan might no longer exist.");
         }
@@ -233,27 +251,24 @@ public class TripServiceImpl implements TripService {
         List<TripResDto> tripResDtoList = new ArrayList<>();
 
         trips.stream().forEach(trip -> {
+            String imageLink = "";
             try {
-                tripResDtoList.add(new TripResDto(trip.getTripId(),
-                        trip.getDestination(),
-                        trip.getStartDate(),
-                        trip.getEndDate(),
-                        trip.getUserId(),
-                        getDestinationImageLink(trip.getDestination()),
-                        calculateRating(trip),
-                        "Shivam Patel"
-                        ));
+                imageLink = getDestinationImageLink(trip.getDestination());
             } catch (JSONException e) {
-                tripResDtoList.add(new TripResDto(trip.getTripId(),
-                        trip.getDestination(),
-                        trip.getStartDate(),
-                        trip.getEndDate(),
-                        trip.getUserId(),
-                        null,
-                        calculateRating(trip),
-                        "Shivam Patel"
-                        ));
+                System.err.println("Failed to fetch image link for destination: " + trip.getDestination());
             }
+
+            UserRepresentation userInfo = keycloakService.getUserById(trip.getUserId());
+
+            tripResDtoList.add(new TripResDto(trip.getTripId(),
+                    trip.getDestination(),
+                    trip.getStartDate(),
+                    trip.getEndDate(),
+                    trip.getUserId(),
+                    imageLink,
+                    calculateRating(trip),
+                    userInfo.getFirstName() + " " + userInfo.getLastName()
+                    ));
         });
         return tripResDtoList;
     }
