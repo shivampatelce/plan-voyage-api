@@ -143,6 +143,11 @@ public class BudgetServiceImpl implements BudgetService {
                 .orElseThrow(() -> new RuntimeException("Invalid Trip Id"));
 
         Budget budget = budgetRepository.findByTrip(trip);
+
+        if(budget == null) {
+            return new ArrayList<>();
+        }
+
         List<Expense> expenses = budget.getExpenses();
 
         Map<String, Double> settlementMap = new HashMap<>();
