@@ -53,6 +53,9 @@ public class Trip {
     @OneToMany(mappedBy = "itineraryRatingId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItineraryRating> itineraryRatings = new ArrayList<>();
 
+    @OneToMany(mappedBy = "documentId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DocumentDetails> documentDetails = new ArrayList<>();
+
     public Trip() {}
 
     public Trip(String destination, Date startDate, Date endDate, String userId) {
@@ -233,5 +236,13 @@ public class Trip {
 
     public void setItineraryRatings(List<ItineraryRating> itineraryRatings) {
         this.itineraryRatings = itineraryRatings;
+    }
+
+    public List<DocumentDetails> getDocumentDetails() {
+        return documentDetails;
+    }
+
+    public void setDocumentDetails(List<DocumentDetails> documentDetails) {
+        this.documentDetails = documentDetails;
     }
 }
