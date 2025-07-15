@@ -3,8 +3,11 @@ package com.example.plan_voyage.dto;
 import jakarta.persistence.UniqueConstraint;
 
 import java.util.Date;
+import java.util.UUID;
 
 public class DocumentDetailsDto {
+
+    private UUID documentId;
 
     private String fileName;
 
@@ -18,13 +21,22 @@ public class DocumentDetailsDto {
 
     private Date uploadDate;
 
-    public DocumentDetailsDto(String fileName, String fileType, long fileSize, String uploaderFullName, String uploaderId, Date uploadDate) {
+    public DocumentDetailsDto(UUID documentId, String fileName, String fileType, long fileSize, String uploaderFullName, String uploaderId, Date uploadDate) {
+        this.documentId = documentId;
         this.fileName = fileName;
         this.fileType = fileType;
         this.fileSize = fileSize;
         this.uploaderFullName = uploaderFullName;
         this.uploaderId = uploaderId;
         this.uploadDate = uploadDate;
+    }
+
+    public UUID getDocumentId() {
+        return documentId;
+    }
+
+    public void setDocumentId(UUID documentId) {
+        this.documentId = documentId;
     }
 
     public String getFileName() {

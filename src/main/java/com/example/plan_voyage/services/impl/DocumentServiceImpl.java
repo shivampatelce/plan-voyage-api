@@ -9,6 +9,8 @@ import com.example.plan_voyage.services.DocumentService;
 import com.example.plan_voyage.services.KeycloakService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -111,7 +113,7 @@ public class DocumentServiceImpl implements DocumentService {
 
                         DocumentDetails documentMetaData = documentDetails.stream().filter(document -> document.getFileName().equals(fileName)).toList().get(0);
 
-                        return new DocumentDetailsDto(fileName, fileType, fileSize, documentMetaData.getUploaderFullName(), documentMetaData.getUploaderId(), documentMetaData.getUploadDate());
+                        return new DocumentDetailsDto(documentMetaData.getDocumentId(), fileName, fileType, fileSize, documentMetaData.getUploaderFullName(), documentMetaData.getUploaderId(), documentMetaData.getUploadDate());
                     } catch (IOException e) {
                         return null;
                     }
@@ -119,5 +121,40 @@ public class DocumentServiceImpl implements DocumentService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteDocument(UUID documentId) {
+        DocumentDetails documentDetails = documentDetailsRepository.findById(documentId)
+                .orElseThrow(()-> new RuntimeException("Invalid document id: " + documentId));
+
+        Path filePath = Paths.get(BASE_DIR)
+                .resolve(documentDetails.getTrip().getTripId().toString())
+                .resolve(documentDetails.getFileName());
+
+        try {
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file from disk: " + e.getMessage(), e);
+        }
+
+        documentDetailsRepository.delete(documentDetails);
+    }
+
+    @Override
+    public Resource downloadDocument(UUID documentId) throws IOException {
+        DocumentDetails documentDetails = documentDetailsRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Invalid document id: " + documentId));
+
+        Path filePath = Paths.get(BASE_DIR)
+                .resolve(documentDetails.getTrip().getTripId().toString())
+                .resolve(documentDetails.getFileName());
+
+        if (!Files.exists(filePath)) {
+            throw new IOException("File not found on disk: " + filePath);
+        }
+
+        return new PathResource(filePath);
+    }
+
 
 }
