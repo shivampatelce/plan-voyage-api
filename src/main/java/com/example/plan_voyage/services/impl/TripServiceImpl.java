@@ -273,6 +273,17 @@ public class TripServiceImpl implements TripService {
         return tripResDtoList;
     }
 
+    @Override
+    public Trip updateTripDates(UpdateTripDatesDto updateTripDatesDto) {
+        Trip trip = tripRepository.findById(updateTripDatesDto.getTripId())
+                .orElseThrow(()-> new RuntimeException("Invalid trip id"));
+
+        trip.setStartDate(updateTripDatesDto.getStartDate());
+        trip.setEndDate(updateTripDatesDto.getEndDate());
+
+        return tripRepository.save(trip);
+    }
+
     private double calculateRating(Trip trip) {
         List<ItineraryRating> itineraryRatings = itineraryRatingRepository.findAllByTrip(trip);
 

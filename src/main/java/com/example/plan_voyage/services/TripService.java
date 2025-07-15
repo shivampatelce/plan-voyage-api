@@ -32,4 +32,6 @@ public interface TripService {
     void exitFromTrip(ExitTripReqDto exitTripReqDto);
 
     List<TripResDto> relatedTripList(String placeName, UUID tripId);
+
+    Trip updateTripDates(UpdateTripDatesDto updateTripDatesDto);
 }

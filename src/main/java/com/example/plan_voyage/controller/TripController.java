@@ -113,4 +113,15 @@ public class TripController extends BaseController {
         tripService.exitFromTrip(exitTripReqDto);
         return success("User has been exited from trip planning.");
     }
+
+    @PutMapping("/update-trip-dates")
+    public ResponseEntity<SuccessResponse<Trip>> updateDate(@RequestBody UpdateTripDatesDto updateTripDatesDto) {
+        Trip trip;
+        try {
+            trip = tripService.updateTripDates(updateTripDatesDto);
+        } catch (Exception e) {
+            return error(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, "/v1/trip/update-trip-dates");
+        }
+        return success(trip,"Trip dates has been updated.");
+    }
 }
