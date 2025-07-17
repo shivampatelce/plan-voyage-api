@@ -24,7 +24,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${allowed-origin}")
+    @Value("${front-end-url}")
     private String ALLOWED_ORIGIN;
 
     @Autowired

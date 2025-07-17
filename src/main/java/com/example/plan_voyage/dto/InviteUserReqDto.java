@@ -11,10 +11,13 @@ public class InviteUserReqDto {
 
     private Date sentAt;
 
-    public InviteUserReqDto(List<String> emails, UUID tripId, Date sentAt) {
+    private String inviterId;
+
+    public InviteUserReqDto(List<String> emails, UUID tripId, Date sentAt, String inviterId) {
         this.emails = emails;
         this.tripId = tripId;
         this.sentAt = sentAt;
+        this.inviterId = inviterId;
     }
 
     public List<String> getEmails() {
@@ -39,5 +42,13 @@ public class InviteUserReqDto {
 
     public void setSentAt(Date sentAt) {
         this.sentAt = sentAt;
+    }
+
+    public String getInviterId() {
+        return inviterId;
+    }
+
+    public void setInviterId(String inviterId) {
+        this.inviterId = inviterId;
     }
 }

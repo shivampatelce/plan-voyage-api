@@ -40,4 +40,13 @@ public class KeycloakServiceImpl implements KeycloakService {
         return usersResource.get(userId).toRepresentation();
     }
 
+    @Override
+    public boolean isUserExistsByEmail(String email) {
+        Keycloak keycloak = getAdminKeycloakInstance();
+        UsersResource usersResource = keycloak.realm(realm).users();
+
+        return !usersResource.search(email, true).isEmpty();
+    }
+
+
 }

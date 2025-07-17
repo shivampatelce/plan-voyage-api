@@ -3,6 +3,7 @@ package com.example.plan_voyage.services.impl;
 import com.example.plan_voyage.dto.*;
 import com.example.plan_voyage.entity.*;
 import com.example.plan_voyage.repository.*;
+import com.example.plan_voyage.services.EmailService;
 import com.example.plan_voyage.services.KeycloakService;
 import com.example.plan_voyage.services.TripService;
 import jakarta.transaction.Transactional;
@@ -46,6 +47,9 @@ public class TripServiceImpl implements TripService {
 
     @Autowired
     private ItineraryRatingRepository itineraryRatingRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public Trip createTrip(CreateTripReqDto createTripReqDto) {
@@ -133,7 +137,13 @@ public class TripServiceImpl implements TripService {
                 .orElseThrow(() -> new RuntimeException("Invalid trip id: " + inviteUserReqDto.getTripId()));
         inviteUserReqDto.getEmails().stream().forEach(email -> {
             InviteUserRequests inviteUserRequests = new InviteUserRequests(email, trip, inviteUserReqDto.getSentAt());
-            inviteUserRepository.save(inviteUserRequests);
+            inviteUserRequests = inviteUserRepository.save(inviteUserRequests);
+
+            UserRepresentation userRepresentation = keycloakService.getUserById(inviteUserReqDto.getInviterId());
+
+            boolean isRegistered = keycloakService.isUserExistsByEmail(email);
+
+            emailService.sendInvitationEmail(email, "Trip Invitation", userRepresentation.getFirstName() + " " + userRepresentation.getLastName(), trip, inviteUserRequests.getInvitationId(), isRegistered);
         });
         return true;
     }
