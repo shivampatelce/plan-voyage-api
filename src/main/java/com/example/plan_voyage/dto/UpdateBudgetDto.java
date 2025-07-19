@@ -8,9 +8,12 @@ public class UpdateBudgetDto {
 
     private UUID tripId;
 
-    public UpdateBudgetDto(Double budget, UUID tripId) {
+    private String userId;
+
+    public UpdateBudgetDto(Double budget, UUID tripId, String userId) {
         this.budget = budget;
         this.tripId = tripId;
+        this.userId = userId;
     }
 
     public Double getBudget() {
@@ -28,4 +31,13 @@ public class UpdateBudgetDto {
     public void setTripId(UUID tripId) {
         this.tripId = tripId;
     }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
 }

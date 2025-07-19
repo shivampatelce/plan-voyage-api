@@ -4,11 +4,15 @@ import java.util.UUID;
 
 public class MarkAsDoneReqDto {
     private String userId;
+
     private UUID taskId;
 
-    public MarkAsDoneReqDto(String userId, UUID taskId) {
+    private UUID tripId;
+
+    public MarkAsDoneReqDto(String userId, UUID taskId, UUID tripId) {
         this.userId = userId;
         this.taskId = taskId;
+        this.tripId = tripId;
     }
 
     public String getUserId() {
@@ -25,5 +29,13 @@ public class MarkAsDoneReqDto {
 
     public void setTaskId(UUID taskId) {
         this.taskId = taskId;
+    }
+
+    public UUID getTripId() {
+        return tripId;
+    }
+
+    public void setTripId(UUID tripId) {
+        this.tripId = tripId;
     }
 }

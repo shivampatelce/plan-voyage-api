@@ -25,7 +25,7 @@ public interface TripService {
 
     List<InvitationListResDto> getTripInvitationsListByEmailId(String email) throws JSONException;
 
-    TripResDto getInvitationDetailByInvitation(TripInvitationDetailReqDto tripInvitationDetailReqDto) throws JSONException;
+    TripResDto getInvitationDetailByInvitation(TripInvitationDetailReqDto tripInvitationDetailReqDto);
 
     void joinTrip(JoinTripReqDto joinTripReqDto);
 

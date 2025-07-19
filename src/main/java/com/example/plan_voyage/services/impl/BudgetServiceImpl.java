@@ -4,9 +4,15 @@ import com.example.plan_voyage.dto.*;
 import com.example.plan_voyage.entity.*;
 import com.example.plan_voyage.repository.*;
 import com.example.plan_voyage.services.BudgetService;
+import com.example.plan_voyage.services.KeycloakService;
+import com.example.plan_voyage.services.NotificationService;
+import com.example.plan_voyage.util.NotificationActionUrl;
+import com.example.plan_voyage.util.NotificationType;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,11 +34,25 @@ public class BudgetServiceImpl implements BudgetService {
     @Autowired
     private SettlementRepository settlementRepository;
 
+    @Autowired
+    private TripUsersRepository tripUsersRepository;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private KeycloakService keycloakService;
+
     @Override
     public Budget setBudget(SetBudgetReqDto setBudgetReqDto) {
         Trip trip = tripRepository.findById(setBudgetReqDto.getTripId())
                 .orElseThrow(()-> new RuntimeException("Invalid Trip Id"));
         Budget budget = new Budget(setBudgetReqDto.getBudget(), trip);
+
+        UserRepresentation userRepresentation = keycloakService.getUserById(setBudgetReqDto.getUserId());
+        String fullName = userRepresentation.getFirstName() + " " + userRepresentation.getLastName();
+
+        sendManageExpenseNotification(trip.getTripId(), setBudgetReqDto.getUserId(), "The trip budget has been set by " + fullName + ".");
         return budgetRepository.save(budget);
     }
 
@@ -51,6 +71,10 @@ public class BudgetServiceImpl implements BudgetService {
         Budget budget = budgetRepository.findByTrip(trip);
 
         budget.setTotalBudget(updateBudgetDto.getBudget());
+
+        UserRepresentation userRepresentation = keycloakService.getUserById(updateBudgetDto.getUserId());
+        String fullName = userRepresentation.getFirstName() + " " + userRepresentation.getLastName();
+        sendManageExpenseNotification(trip.getTripId(), updateBudgetDto.getUserId(), "The trip budget has been updated by " + fullName + ".");
 
         return budgetRepository.save(budget);
     }
@@ -75,6 +99,10 @@ public class BudgetServiceImpl implements BudgetService {
             SplitDetail newAddedSplitDetail = new SplitDetail(splitDetail.getUserId(), splitDetail.getAmount(), addedExpense);
             splitDetailRepository.save(newAddedSplitDetail);
         });
+
+        UserRepresentation userRepresentation = keycloakService.getUserById(addExpenseReqDto.getPaidBy());
+        String fullName = userRepresentation.getFirstName() + " " + userRepresentation.getLastName();
+        sendManageExpenseNotification(trip.getTripId(), addExpenseReqDto.getPaidBy(), fullName+ " has added a new expense.");
 
         return expense;
     }
@@ -240,6 +268,20 @@ public class BudgetServiceImpl implements BudgetService {
         settlement.setAmount(editSettlementDto.getAmount());
 
         return settlementRepository.save(settlement);
+    }
+
+    private void sendManageExpenseNotification(UUID tripId, String taskPerformerId, String message) {
+        List<String> tripUsers = tripUsersRepository.findAllByTripId(tripId)
+                .stream()
+                .map((TripUsers::getUserId))
+                .filter(userId -> !userId.equals(taskPerformerId)).toList();
+
+        notificationService.sendNotification(new Notification("Manage Expense",
+                message,
+                NotificationType.MANAGE_EXPENSES,
+                NotificationActionUrl.MANAGE_EXPENSES.replace("{tripId}",tripId.toString()),
+                LocalDateTime.now(),
+                tripId), tripUsers);
     }
 
 }

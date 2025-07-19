@@ -7,6 +7,9 @@ import com.example.plan_voyage.entity.*;
 import com.example.plan_voyage.repository.*;
 import com.example.plan_voyage.services.ItineraryService;
 import com.example.plan_voyage.services.KeycloakService;
+import com.example.plan_voyage.services.NotificationService;
+import com.example.plan_voyage.util.NotificationActionUrl;
+import com.example.plan_voyage.util.NotificationType;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +48,12 @@ public class ItineraryServiceImpl implements ItineraryService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private TripUsersRepository tripUsersRepository;
 
     @Value("${opencage.api.key}")
     private String opencageApiKey;
@@ -93,6 +103,21 @@ public class ItineraryServiceImpl implements ItineraryService {
 
             itinerary.setItineraryPlaces(List.of(newItineraryPlace));
         }
+
+        UserRepresentation userRepresentation = keycloakService.getUserById(addItineraryReqDto.getUserId());
+
+        List<String> tripUsers = tripUsersRepository.findAllByTripId(trip.getTripId())
+                .stream()
+                .map((TripUsers::getUserId))
+                .filter(userId -> !userId.equals(addItineraryReqDto.getUserId())).toList();
+
+        notificationService.sendNotification(new Notification("Itinerary",
+                userRepresentation.getFirstName() + " " + userRepresentation.getLastName() + " has added a new item to the itinerary",
+                NotificationType.ITINERARY,
+                NotificationActionUrl.ITINERARY.replace("{tripId}",trip.getTripId().toString()),
+                LocalDateTime.now(),
+                trip.getTripId()), tripUsers);
+
         return itinerary;
     }
 

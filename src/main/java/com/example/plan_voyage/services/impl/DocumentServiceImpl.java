@@ -2,11 +2,17 @@ package com.example.plan_voyage.services.impl;
 
 import com.example.plan_voyage.dto.DocumentDetailsDto;
 import com.example.plan_voyage.entity.DocumentDetails;
+import com.example.plan_voyage.entity.Notification;
 import com.example.plan_voyage.entity.Trip;
+import com.example.plan_voyage.entity.TripUsers;
 import com.example.plan_voyage.repository.DocumentDetailsRepository;
 import com.example.plan_voyage.repository.TripRepository;
+import com.example.plan_voyage.repository.TripUsersRepository;
 import com.example.plan_voyage.services.DocumentService;
 import com.example.plan_voyage.services.KeycloakService;
+import com.example.plan_voyage.services.NotificationService;
+import com.example.plan_voyage.util.NotificationActionUrl;
+import com.example.plan_voyage.util.NotificationType;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.PathResource;
@@ -21,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,6 +45,12 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Autowired
     private KeycloakService keycloakService;
+
+    @Autowired
+    private TripUsersRepository tripUsersRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public DocumentDetails documentUpload(MultipartFile file, UUID tripId, String uploaderId) throws UnsupportedMediaTypeStatusException, IOException {
@@ -76,6 +89,8 @@ public class DocumentServiceImpl implements DocumentService {
         if(!documentList.isEmpty()) {
             documentMetaData = documentList.get(0);
         }
+
+        sendDocumentUploadNotification(tripId, uploaderId, "One document has been uploaded by " + fullName +".");
 
         if(documentMetaData != null) {
             return documentDetailsRepository.save(new DocumentDetails(documentMetaData.getDocumentId(), uploaderId, fullName, new Date(), filename, trip));
@@ -156,5 +171,18 @@ public class DocumentServiceImpl implements DocumentService {
         return new PathResource(filePath);
     }
 
+    private void sendDocumentUploadNotification(UUID tripId, String taskPerformerId, String message) {
+        List<String> tripUsers = tripUsersRepository.findAllByTripId(tripId)
+                .stream()
+                .map((TripUsers::getUserId))
+                .filter(userId -> !userId.equals(taskPerformerId)).toList();
+
+        notificationService.sendNotification(new Notification("Document",
+                message,
+                NotificationType.DOCUMENT,
+                NotificationActionUrl.DOCUMENT.replace("{tripId}",tripId.toString()),
+                LocalDateTime.now(),
+                tripId), tripUsers);
+    }
 
 }

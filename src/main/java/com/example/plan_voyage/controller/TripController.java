@@ -90,8 +90,6 @@ public class TripController extends BaseController {
         TripResDto tripDetails = null;
         try {
             tripDetails = tripService.getInvitationDetailByInvitation(tripInvitationDetailReqDto);
-        } catch (JSONException e) {
-            return error("Something goes wrong while fetching destination image", HttpStatus.INTERNAL_SERVER_ERROR, "/invitation");
         } catch (RuntimeException e) {
             return error(e.getMessage(), HttpStatus.BAD_REQUEST, ErrorCode.INVALID_TRIP_INVITATION, "/invitation");
         }

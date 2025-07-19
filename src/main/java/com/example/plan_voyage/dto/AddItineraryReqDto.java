@@ -16,13 +16,16 @@ public class AddItineraryReqDto {
 
     private Date date;
 
-    public AddItineraryReqDto(UUID tripId, UUID itineraryId, String place, String category, String time, Date date) {
+    private String userId;
+
+    public AddItineraryReqDto(UUID tripId, UUID itineraryId, String place, String category, String time, Date date, String userId) {
         this.tripId = tripId;
         this.itineraryId = itineraryId;
         this.place = place;
         this.category = category;
         this.time = time;
         this.date = date;
+        this.userId = userId;
     }
 
     public UUID getTripId() {
@@ -71,5 +74,13 @@ public class AddItineraryReqDto {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

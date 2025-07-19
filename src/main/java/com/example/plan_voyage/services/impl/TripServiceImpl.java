@@ -5,7 +5,10 @@ import com.example.plan_voyage.entity.*;
 import com.example.plan_voyage.repository.*;
 import com.example.plan_voyage.services.EmailService;
 import com.example.plan_voyage.services.KeycloakService;
+import com.example.plan_voyage.services.NotificationService;
 import com.example.plan_voyage.services.TripService;
+import com.example.plan_voyage.util.NotificationActionUrl;
+import com.example.plan_voyage.util.NotificationType;
 import jakarta.transaction.Transactional;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,6 +54,9 @@ public class TripServiceImpl implements TripService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public Trip createTrip(CreateTripReqDto createTripReqDto) {
@@ -141,9 +148,20 @@ public class TripServiceImpl implements TripService {
 
             UserRepresentation userRepresentation = keycloakService.getUserById(inviteUserReqDto.getInviterId());
 
-            boolean isRegistered = keycloakService.isUserExistsByEmail(email);
+            UserRepresentation receiverUser = keycloakService.getUserByEmail(email);
 
-            emailService.sendInvitationEmail(email, "Trip Invitation", userRepresentation.getFirstName() + " " + userRepresentation.getLastName(), trip, inviteUserRequests.getInvitationId(), isRegistered);
+            if(receiverUser != null) {
+                notificationService.sendNotification(new Notification("Trip Invitation",
+                        userRepresentation.getFirstName() + " " + userRepresentation.getLastName() + " invited you to join trip to " +
+                                trip.getDestination(),
+                        NotificationType.INVITATION,
+                        NotificationActionUrl.INVITATION,
+                        LocalDateTime.now(),
+                        trip.getTripId()
+                ), List.of(receiverUser.getId()));
+            }
+
+            emailService.sendInvitationEmail(email, "Trip Invitation", userRepresentation.getFirstName() + " " + userRepresentation.getLastName(), trip, inviteUserRequests.getInvitationId(), receiverUser != null);
         });
         return true;
     }

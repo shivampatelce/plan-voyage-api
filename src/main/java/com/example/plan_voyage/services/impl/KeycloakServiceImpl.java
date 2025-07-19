@@ -9,6 +9,8 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class KeycloakServiceImpl implements KeycloakService {
     @Value("${keycloak.config.auth-server-url}")
@@ -48,5 +50,18 @@ public class KeycloakServiceImpl implements KeycloakService {
         return !usersResource.search(email, true).isEmpty();
     }
 
+    @Override
+    public UserRepresentation getUserByEmail(String email) {
+        Keycloak keycloak = getAdminKeycloakInstance();
+        UsersResource usersResource = keycloak.realm(realm).users();
+
+        List<UserRepresentation> users = usersResource.search(email, true);
+
+        if (!users.isEmpty()) {
+            return users.get(0);
+        }
+
+        return null;
+    }
 
 }
